@@ -1,0 +1,23 @@
+# Dependencies / build output (any depth)
+**/node_modules/
+**/vendor/
+**/dist/
+**/.angular/
+hg-backend/public/build/
+
+# Laravel runtime
+hg-backend/storage/*.key
+hg-backend/.env
+hg-backend/storage/framework/cache/*
+hg-backend/storage/framework/sessions/*
+hg-backend/storage/framework/views/*
+hg-backend/storage/logs/*
+
+# macOS / editor junk
+.DS_Store
+._*
+.idea/
+.vscode/
+
+# Logs
+*-debug.log*

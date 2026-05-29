@@ -1,0 +1,35 @@
+<div class="login-page">
+    <h2>Login</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" aria-labelledby="signup-form-title">
+      <div>
+        <label for="username">Email:</label>
+        <input id="username" formControlName="username" type="text" required />
+        <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error">
+          Username is required
+        </div>
+      </div>
+      
+      <div>
+        <label for="password">Password:</label>
+        <input id="password" formControlName="password" type="password" required />
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error">
+          Password is required
+        </div>
+      </div>
+  
+      <button 
+      type="submit" 
+      [disabled]="loginForm.invalid" 
+      [attr.aria-disabled]="loginForm.invalid ? 'true' : 'false'" 
+      class="btn btn-primary">
+      Login
+      </button>
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+    </form>
+  </div>
+  
