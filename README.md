@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://lynx1097.github.io/Hangman-Web-App/app/"><strong>▶ Play the live app</strong></a>
+  <a href="https://lynx1097.github.io/Hangman-Web-App/app/"><img src="screenshots/play.png" width="800"></a>
 </p>
 
 <p align="center">
@@ -31,29 +31,27 @@ Rather than ship a single monolithic page, the project embraces that breadth wit
 
 ## 🖼️ Screenshots
 
-> Place captured images in a `screenshots/` folder at the repository root, then the links below will render automatically.
-
 ### Home (Angular)
-<p align="center"><img src="screenshots/home.png" alt="Home page" width="800"></p>
+<p align="center"><img src="screenshots/home.jpeg" alt="Home page" width="800"></p>
 
 ### Sign Up (Angular)
-<p align="center"><img src="screenshots/signup.png" alt="Sign up page" width="800"></p>
+<p align="center"><img src="screenshots/signup.jpeg" alt="Sign up page" width="800"></p>
 
 ### Login + cold-start loader (Angular)
-<p align="center"><img src="screenshots/login.png" alt="Login page" width="800"></p>
-<p align="center"><img src="screenshots/loading.png" alt="Cold-start entertaining loader" width="800"></p>
+<p align="center"><img src="screenshots/login.jpeg" alt="Login page" width="800"></p>
+<p align="center"><img src="screenshots/loading.jpeg" alt="Cold-start entertaining loader" width="800"></p>
 
 ### The Game — in progress (Vue)
-<p align="center"><img src="screenshots/game-playing.png" alt="Game in progress" width="800"></p>
+<p align="center"><img src="screenshots/game-playing.jpeg" alt="Game in progress" width="800"></p>
 
 ### The Game — win / loss states (Vue)
-<p align="center"><img src="screenshots/game-won.png" alt="Game won" width="800"></p>
+<p align="center"><img src="screenshots/game-won.jpeg" alt="Game won" width="800"></p>
 
 ### Profile & stats (Angular)
-<p align="center"><img src="screenshots/profile.png" alt="Profile page" width="800"></p>
+<p align="center"><img src="screenshots/profile.jpeg" alt="Profile page" width="800"></p>
 
 ### Mobile / responsive views
-<p align="center"><img src="screenshots/mobile.png" alt="Responsive mobile layout" width="320"></p>
+<p align="center"><img src="screenshots/mobile.jpeg" alt="Responsive mobile layout" width="320"></p>
 
 ---
 
@@ -61,26 +59,26 @@ Rather than ship a single monolithic page, the project embraces that breadth wit
 
 ```
                          ┌──────────────────────────────────────────┐
-                         │              The Player                   │
+                         │              The Player                  │
                          └───────────────┬──────────────────────────┘
                                          │
-            ┌────────────────────────────┴───────────────────────────┐
+            ┌────────────────────────────┴─────────────────────────────┐
             │                                                          │
             ▼                                                          ▼
-┌──────────────────────────┐                         ┌──────────────────────────┐
+┌───────────────────────────┐                         ┌───────────────────────────┐
 │   hg-front-game (Angular) │                         │   hangman-game (Vue 3)    │
 │  ─────────────────────────│                         │ ──────────────────────────│
-│  • Home / marketing       │   shared Bearer token   │  • The actual gameplay     │
-│  • Sign up / Login        │  ───────────────────►   │  • Animated SVG hangman    │
-│  • Profile & stats        │   (localStorage +       │  • Keyboard + on-screen    │
-│  • Auth guard/interceptor │    ?token= handoff)     │    keypad input            │
-│  GitHub Pages: /app/      │                         │  GitHub Pages: /game/      │
+│  • Home / marketing       │   shared Bearer token   │  • The actual gameplay    │
+│  • Sign up / Login        │  ───────────────────►   │  • Animated SVG hangman   │
+│  • Profile & stats        │   (localStorage +       │  • Keyboard + on-screen   │
+│  • Auth guard/interceptor │    ?token= handoff)     │    keypad input           │
+│  GitHub Pages: /app/      │                         │  GitHub Pages: /game/     │
 └─────────────┬─────────────┘                         └─────────────┬─────────────┘
-              │                                                      │
+              │                                                     │
               │            REST + Sanctum Bearer tokens             │
-              └────────────────────────┬─────────────────────────────┘
+              └────────────────────────┬────────────────────────────┘
                                        ▼
-                       ┌────────────────────────────────┐
+                       ┌─────────────────────────────────┐
                        │      hg-backend (Laravel 11)    │
                        │  ───────────────────────────────│
                        │  • REST API (/api/*)            │
@@ -91,7 +89,7 @@ Rather than ship a single monolithic page, the project embraces that breadth wit
                        └───────────────┬─────────────────┘
                                        ▼
                        ┌────────────────────────────────┐
-                       │     TiDB Cloud (MySQL, TLS)     │
+                       │     TiDB Cloud (MySQL, TLS)    │
                        └────────────────────────────────┘
 ```
 
@@ -213,43 +211,6 @@ Each tier deploys to the platform best suited to it:
 - A **GitHub Actions workflow** (`.github/workflows/deploy-pages.yml`) builds both front-ends and publishes them to Pages on every push.
 - The real backend and game URLs are **injected at build time** from GitHub Environment variables, so production endpoints never live in the source.
 - Angular uses **hash routing** and Vue uses a configurable **public path**, so both work correctly under a sub-path with no server rewrites.
-
----
-
-## 🚀 Running locally
-
-> Requires **PHP 8.2+** & **Composer**, **Node.js 18+**, and a MySQL-compatible database (or SQLite for quick local runs).
-
-### Backend (`hg-backend`)
-```bash
-cd hg-backend
-composer install
-cp .env.example .env          # then set your DB credentials
-php artisan key:generate
-php artisan migrate
-php artisan serve             # → http://127.0.0.1:8000
-```
-
-Run the test suite:
-```bash
-php artisan test              # 11 passed (56 assertions)
-```
-
-### Angular shell (`hg-front-game`)
-```bash
-cd hg-front-game
-npm install
-npm start                     # → http://localhost:4200
-```
-
-### Vue game (`hangman-game`)
-```bash
-cd hangman-game
-npm install
-npm run serve                 # → http://localhost:8080
-```
-
-With all three running, open the Angular app, create an account, log in, and you'll be handed off to the Vue game with your token in hand.
 
 ---
 
