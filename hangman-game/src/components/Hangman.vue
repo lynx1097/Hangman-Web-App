@@ -1,5 +1,9 @@
 <template>
   <div class="hangman">
+    <div class="topbar">
+      <a class="btn btn-ghost home-btn" :href="homeUrl">🏠 Home</a>
+    </div>
+
     <h1>Hangman</h1>
 
     <!-- Not logged in: the game needs a backend token -->
@@ -100,7 +104,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
-import { RootState, LOGIN_URL } from '@/store';
+import { RootState, LOGIN_URL, HOME_URL } from '@/store';
 
 // Minimum gap between accepted keystrokes — gives the backend room to respond
 // before we let the next guess through.
@@ -216,6 +220,7 @@ export default defineComponent({
       tips: TIPS,
       tipIndex,
       loginUrl: LOGIN_URL,
+      homeUrl: HOME_URL,
       newGame,
       guess,
       busy,
@@ -379,6 +384,25 @@ h1 {
 .btn-accent {
   background: linear-gradient(135deg, #f59e0b, var(--accent));
   color: #3b2606;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.topbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.home-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 9px 18px;
+  font-size: 0.95rem;
 }
 
 .result {

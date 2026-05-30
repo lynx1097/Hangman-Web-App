@@ -108,6 +108,8 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 - **Laravel Sanctum 4** issues stateless **Bearer tokens** on register/login; protected routes sit behind the `auth:sanctum` middleware.
 - **Eloquent ORM** models — `User`, `Game`, `LeaderboardEntry` — with migrations for full schema versioning.
 - **Word sourcing with graceful fallback:** new games pull a word + hint from an external word API, and **transparently fall back to a built-in word list** if the API is unavailable — the game never breaks.
+- **Anti-repetition word selection:** each new game avoids any word the player has already been served (derived from their existing `games` rows), so they cycle through *every* available word once before any repeats. When the pool is exhausted the history is transparently recycled, so a game can always start.
+- **Skill-based scoring** computed entirely server-side: a base score from word length, a **near-miss multiplier** (winning with only one guess left multiplies the score by `1 + 0.15 × distinct correct letters`), a penalty for wrong guesses, and a **speed bonus** derived from the front-end-reported time.
 - **Pure-JSON error handling:** the exception handler always renders JSON (e.g. a clean `401` for unauthenticated requests) instead of attempting HTML redirects — exactly what an API client expects.
 - **Self-service, self-only account management:** every `/users/{user}` route verifies the authenticated user is acting on their own account (`403` otherwise).
 - **Automated test suite (Pest):** 11 feature tests, 56 assertions, covering authentication gates, masked-word generation, the API/fallback word source, correct/incorrect guess accounting, win/loss transitions, leaderboard updates, duplicate/invalid-letter rejection, and ownership enforcement.
@@ -125,7 +127,7 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 | `DELETE`| `/api/users/{user}`              | ✅   | Delete own account                       |
 | `GET`  | `/api/games`                      | ✅   | List the player's games                  |
 | `POST` | `/api/games`                      | ✅   | Start a new game (returns masked word)   |
-| `POST` | `/api/games/{game}/guesses`       | ✅   | Submit a single-letter guess             |
+| `POST` | `/api/games/{game}/guesses`       | ✅   | Submit a single-letter guess (+ optional `elapsed_seconds`) |
 | `GET`  | `/api/leaderboard`                | —    | Global leaderboard                       |
 | `GET`  | `/api/leaderboard/users/{user}`   | ✅   | A player's personal stats                |
 
@@ -141,6 +143,8 @@ The Angular app is the **front door**: marketing home page, account creation, lo
 - **Animated, asset-free hero:** the gallows on the home page is a hand-built, gently swinging **SVG** — no image files.
 - **Honest, entertaining cold-start loader:** because the backend runs on a free tier that sleeps, the first request can take up to a minute. Instead of a frozen screen, the user sees an animated loader with **rotating gameplay tips** and a friendly, transparent note explaining the wake-up delay.
 - **Profile dashboard** with avatar initial, total score, games won, and games played pulled live from the API.
+- **Full account self-service:** a dedicated **leaderboard page** (global rankings with medals for the top three), an in-profile **change-password** form (verifies the current password), and a confirm-gated **delete-account** flow — every backend account API is now surfaced in the UI.
+- **Auth-aware navigation:** the home page shows **Login / Sign Up** when signed out and swaps to a **Profile** button once a token is present, so the entry points always match the player's state.
 
 ### 3. `hangman-game` — Vue 3 single-page game (the playground)
 
@@ -151,6 +155,9 @@ The Vue app is where the game actually happens — a focused, reactive SPA.
 - **Fully animated SVG hangman:** the six body parts fade and scale into place as wrong guesses accumulate (and turn red on a loss) — replacing the old static image sequence entirely.
 - **Dual input — keyboard *and* touch:** players can **type a letter** or tap the on-screen keypad. Keyboard input is rate-limited to **one letter at a time with a deliberate cooldown**, giving the backend room to validate and respond before the next guess is accepted — smooth on fast typing, friendly to the network round-trip.
 - **Auto-start:** an authenticated player who lands on the game immediately gets a fresh word.
+- **Live game timer:** the game runs its own clock (the backend keeps no timer) and reports the elapsed seconds with each guess, so a faster win earns a bigger score; the final time is shown on the result card.
+- **Near-miss tension:** when a player is one wrong guess from losing, an animated banner flags the chance for a big near-miss scoring bonus.
+- **In-game Home button** that returns the player to the Angular shell's home page.
 - **Its own entertaining loader** for the first backend hit, matching the Angular experience.
 
 ---
@@ -163,7 +170,7 @@ The apps are **independently built and deployed**, yet they behave as one produc
 
 2. **A cross-origin token handoff.** In production both front-ends live on the same GitHub Pages origin, so `localStorage` is shared directly. To also work in local development (Angular on `:4200`, Vue on `:8080`, different origins), the Angular login **appends the token to the redirect URL** (`?token=…`); the Vue game reads it from the query string on load, persists it, and **cleans the URL** — so the handoff is seamless in both environments.
 
-3. **A shared visual identity.** Both front-ends use the **same design tokens** — colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font — defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app.
+3. **A shared visual identity.** Both front-ends use the **same design tokens** — colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font — defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app. Both apps also share an **animated ambient background** (a slowly drifting glow plus a faint moving dot texture, with `prefers-reduced-motion` respected) and a lightened, higher-contrast text palette for comfortable reading.
 
 ---
 
@@ -182,7 +189,7 @@ The apps are **independently built and deployed**, yet they behave as one produc
 | Table               | Key fields                                                                 |
 |---------------------|---------------------------------------------------------------------------|
 | `users`             | `id`, `name`, `email`, `password` (hashed)                                |
-| `games`             | `id`, `user_id`, `word` (secret), `hint`, `category`, `masked_word`, `guessed_letters`, `wrong_guesses`, `status` |
+| `games`             | `id`, `user_id`, `word` (secret), `hint`, `category`, `masked_word`, `guessed_letters`, `wrong_guesses`, `status`, `score`, `elapsed_seconds` |
 | `leaderboard_entries` | `id`, `user_id`, `total_score`, `games_won`, `games_played`             |
 | `personal_access_tokens` | Sanctum-managed Bearer tokens                                       |
 | `sessions`          | Database-backed session store                                              |

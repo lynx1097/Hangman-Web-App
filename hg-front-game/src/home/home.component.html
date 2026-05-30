@@ -24,10 +24,15 @@
     <p class="tagline">Guess the word, one letter at a time — before the figure is complete.</p>
 
     <div class="auth-buttons">
-      <button class="btn" (click)="navigateToLogin()">Login</button>
-      <button class="btn btn-accent" (click)="navigateToSignup()">Sign Up</button>
-      <button class="btn btn-ghost" (click)="navigateToLeaderboard()">🏆 Leaderboard</button>
-      <button class="btn btn-ghost" (click)="navigateToProfile()">Profile</button>
+      <ng-container *ngIf="!isLoggedIn; else loggedIn">
+        <button class="btn" (click)="navigateToLogin()">Login</button>
+        <button class="btn btn-accent" (click)="navigateToSignup()">Sign Up</button>
+        <button class="btn btn-ghost" (click)="navigateToLeaderboard()">🏆 Leaderboard</button>
+      </ng-container>
+      <ng-template #loggedIn>
+        <button class="btn" (click)="navigateToProfile()">Profile</button>
+        <button class="btn btn-ghost" (click)="navigateToLeaderboard()">🏆 Leaderboard</button>
+      </ng-template>
     </div>
   </header>
 

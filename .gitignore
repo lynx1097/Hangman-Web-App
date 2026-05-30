@@ -24,3 +24,4 @@ hg-backend/storage/logs/*
 .env
 .env*
 hg-backend/.env.example
+/.claude

@@ -13,6 +13,9 @@ const TOKEN_KEY = 'auth_token';
 // Where to send unauthenticated players to log in (the Angular app).
 export const LOGIN_URL = process.env.VUE_APP_LOGIN_URL || 'http://localhost:4200/#/login';
 
+// The Angular shell's home page — used by the in-game "Home" button.
+export const HOME_URL = process.env.VUE_APP_HOME_URL || 'http://localhost:4200/#/home';
+
 export type GameStatus = 'idle' | 'in_progress' | 'won' | 'lost';
 
 export interface GameState {
