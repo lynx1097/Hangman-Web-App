@@ -1,158 +1,161 @@
 <template>
-  <div>
-    <h1 v-if="!gameOver && !gameWon">Hangman Game</h1>
-    
-    <!-- Game Over alert -->
-    <div v-if="gameOver || gameWon" class="game-over">
-      <h2>{{ gameWon ? 'You Won!' : 'Game Over!' }}</h2>
-      <p>Your score: {{ score }}</p>
-      <button @click="resetGame">Play Again</button>
-    </div>
-    
-    <div v-else>
-      <!-- Display the hint -->
-      <p><strong>Hint:</strong> {{ hint }}</p>
-      
-      <!-- Word Display -->
-      <p><strong>Word:</strong> {{ wordDisplay }}</p>
+  <div class="hangman">
+    <h1>Hangman</h1>
 
-      <!-- Display the hangman image based on incorrect guesses -->
-      <img :src="`/images/hangman/${hangmanImage}.png`" alt="Hangman" />
-      
-      <!-- Display guessed letters -->
-      <p><strong>Guessed Letters:</strong> {{ guessedLetters.join(', ') }}</p>
-      <p><strong>Incorrect Guesses:</strong> {{ incorrectGuesses }} / {{ maxIncorrectGuesses }}</p>
+    <!-- Not logged in: the game needs a backend token -->
+    <p v-if="!isAuthenticated" class="notice">
+      Please <a :href="loginUrl">log in</a> to play.
+    </p>
 
-      <!-- Keypad -->
-      <div class="keypad">
-        <div v-for="letter in alphabet" :key="letter">
-          <button 
-            :disabled="guessedLetters.includes(letter)" 
-            @click="makeGuess(letter)">
+    <template v-else>
+      <p v-if="error" class="error">{{ error }}</p>
+
+      <!-- Idle: offer to start -->
+      <div v-if="status === 'idle'" class="start">
+        <button :disabled="loading" @click="newGame">
+          {{ loading ? 'Starting…' : 'Start Game' }}
+        </button>
+      </div>
+
+      <!-- A game is active or finished -->
+      <div v-else class="board">
+        <img :src="`${baseUrl}images/hangman/${hangmanImageIndex}.png`" alt="Hangman" />
+
+        <p class="hint">
+          <strong>Hint:</strong> {{ hint || 'No hint available' }}
+          <span v-if="category" class="category">({{ category }})</span>
+        </p>
+
+        <p class="word">{{ maskedWord }}</p>
+
+        <p class="status-line">
+          <strong>Attempts left:</strong> {{ remainingAttempts }} / {{ maxWrongGuesses }}
+          &nbsp;•&nbsp;
+          <strong>Guessed:</strong> {{ guessedLetters.join(', ') || '—' }}
+        </p>
+
+        <div class="keypad">
+          <button
+            v-for="letter in alphabet"
+            :key="letter"
+            :disabled="!isPlaying || guessedLetters.includes(letter) || loading"
+            @click="guess(letter)"
+          >
             {{ letter }}
           </button>
         </div>
-      </div>
 
-      <p><strong>Score:</strong> {{ score }}</p>
-      <button @click="resetGame">Reset Game</button>
-    </div>
+        <!-- Result -->
+        <div v-if="isFinished" class="result" :class="{ won: gameWon, lost: gameLost }">
+          <h2>{{ gameWon ? 'You Won! 🎉' : 'Game Over' }}</h2>
+          <p v-if="gameWon">Score: {{ score }}</p>
+          <p>The word was: <strong>{{ revealedWord }}</strong></p>
+          <button :disabled="loading" @click="newGame">Play Again</button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { RootState } from '@/store';
+import { RootState, LOGIN_URL } from '@/store';
 
 export default defineComponent({
   name: 'Hangman',
   setup() {
     const store = useStore<RootState>();
-
-    // Define the alphabet for the keypad
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    // Public path the app is served under (root in dev, /…/game/ on Pages).
+    const baseUrl = process.env.BASE_URL;
 
-    // Computed properties for hint, word display, hangman image, and guessed letters
-    const hint = computed(() => store.state.game.hint);
-    const wordDisplay = computed(() => store.getters.wordDisplay);
-    const hangmanImage = computed(() => store.state.game.incorrectGuesses);
-    const guessedLetters = computed(() => store.state.game.guessedLetters);
+    const newGame = () => store.dispatch('startGame');
+    const guess = (letter: string) => store.dispatch('guess', letter);
 
-    // Make a guess and dispatch to Vuex store
-    const makeGuess = (letter: string) => {
-      if (letter && !guessedLetters.value.includes(letter.toUpperCase())) {
-        store.dispatch('makeGuess', letter.toUpperCase());
+    // Auto-start a game for an authenticated player on load.
+    onMounted(() => {
+      if (store.getters.isAuthenticated) {
+        store.dispatch('startGame');
       }
-    };
+    });
 
-    // Reset game and fetch a new word and hint
-    const resetGame = async () => {
-      await store.dispatch('fetchWordAndHint');
-    };
-
-    // Return all the necessary properties for the template
     return {
       alphabet,
-      hint,
-      wordDisplay,
-      hangmanImage,
-      guessedLetters,
-      makeGuess,
-      resetGame,
+      baseUrl,
+      loginUrl: LOGIN_URL,
+      newGame,
+      guess,
+      // state
+      maskedWord: computed(() => store.state.maskedWord),
+      hint: computed(() => store.state.hint),
+      category: computed(() => store.state.category),
+      guessedLetters: computed(() => store.state.guessedLetters),
+      remainingAttempts: computed(() => store.state.remainingAttempts),
+      maxWrongGuesses: computed(() => store.state.maxWrongGuesses),
+      status: computed(() => store.state.status),
+      score: computed(() => store.state.score),
+      revealedWord: computed(() => store.state.revealedWord),
+      loading: computed(() => store.state.loading),
+      error: computed(() => store.state.error),
+      // getters
+      isAuthenticated: computed(() => store.getters.isAuthenticated),
+      isPlaying: computed(() => store.getters.isPlaying),
+      gameWon: computed(() => store.getters.gameWon),
+      gameLost: computed(() => store.getters.gameLost),
+      isFinished: computed(() => store.getters.isFinished),
+      hangmanImageIndex: computed(() => store.getters.hangmanImageIndex),
     };
   },
-  data() {
-    return {
-      currentGuess: ''
-    };
-  },
-  computed: {
-    store() {
-      return useStore<RootState>();
-    },
-    word(): string {
-      return this.store.state.game.word;
-    },
-    wordDisplay(): string {
-      return this.store.getters.wordDisplay;
-    },
-    guessedLetters(): string[] {
-      return this.store.state.game.guessedLetters;
-    },
-    incorrectGuesses(): number {
-      return this.store.state.game.incorrectGuesses;
-    },
-    maxIncorrectGuesses(): number {
-      return this.store.state.game.maxIncorrectGuesses;
-    },
-    gameOver(): boolean {
-      return this.store.getters.gameOver;
-    },
-    gameWon(): boolean {
-      return this.store.getters.gameWon;
-    },
-    hangmanImage(): string {
-      return this.store.getters.hangmanImage;
-    },
-    score(): number {
-      return this.store.state.game.score;
-    }
-  },
-  methods: {
-    guessLetter() {
-      if (this.currentGuess && !this.gameOver && !this.gameWon) {
-        this.store.dispatch('makeGuess', this.currentGuess.toUpperCase());
-        this.currentGuess = '';
-      }
-    },
-    resetGame() {
-      this.store.dispatch('resetGame');
-      this.store.dispatch('increaseScore');
-      this.currentGuess = '';
-    }
-  }
 });
 </script>
 
 <style scoped>
-/* Keypad styling */
+.hangman {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.notice,
+.error {
+  font-size: 1.1rem;
+}
+
+.error {
+  color: #b00020;
+}
+
+img {
+  max-height: 240px;
+}
+
+.word {
+  font-size: 2rem;
+  letter-spacing: 0.3rem;
+  font-family: monospace;
+}
+
+.category {
+  color: #6c757d;
+  font-style: italic;
+}
+
 .keypad {
   display: grid;
-  grid-template-columns: repeat(20, 1fr); /* 7 columns for alphabet (A-Z) */
+  grid-template-columns: repeat(13, 1fr);
   gap: 5px;
-  margin-top: 20px;
+  margin: 20px 0;
 }
 
 .keypad button {
-  padding: 12px;
-  font-size: 1.2rem;
+  padding: 12px 0;
+  font-size: 1.1rem;
   background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
 .keypad button:disabled {
@@ -165,34 +168,31 @@ export default defineComponent({
 }
 
 button {
-  padding: 10px;
+  padding: 10px 16px;
   background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  font-size: 1rem;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background-color: #0056b3;
 }
 
-.game-over {
-  text-align: center;
-  padding: 20px;
-  background-color: #ff6f61;
-  color: white;
-  border-radius: 10px;
-}
-
-.game-over h2 {
-  font-size: 2rem;
-}
-
-.game-over button {
+.result {
   margin-top: 20px;
-  background-color: #007bff;
+  padding: 20px;
+  border-radius: 10px;
   color: white;
-  border-radius: 5px;
+}
+
+.result.won {
+  background-color: #2e7d32;
+}
+
+.result.lost {
+  background-color: #ff6f61;
 }
 </style>

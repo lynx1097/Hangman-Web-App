@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
@@ -12,10 +12,18 @@ class Game extends Model
     protected $fillable = [
         'user_id',
         'word',
+        'hint',
+        'category',
         'guessed_letters',
         'wrong_guesses',
         'status',
-        'score'
+        'score',
+    ];
+
+    protected $casts = [
+        'guessed_letters' => 'array',
+        'wrong_guesses'   => 'integer',
+        'score'           => 'integer',
     ];
 
     public function user()

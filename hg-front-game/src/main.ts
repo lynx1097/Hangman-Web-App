@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, Routes } from '@angular/router';
+import { provideRouter, Routes, withHashLocation } from '@angular/router';
 import { AppComponent } from './app/app.component';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
@@ -14,12 +14,14 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'game' , component: GameComponent},
-  { path: '', redirectTo: '/home', pathMatch: 'full' }
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '**', redirectTo: '/home' }
 ];
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes),
+    // Hash routing so deep links/refresh work on GitHub Pages (no server rewrites).
+    provideRouter(routes, withHashLocation()),
     provideHttpClient()
   ]
 }).catch(err => console.error(err));

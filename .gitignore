@@ -21,3 +21,6 @@ hg-backend/storage/logs/*
 
 # Logs
 *-debug.log*
+.env
+.env*
+hg-backend/.env.example

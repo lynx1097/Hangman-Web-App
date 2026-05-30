@@ -1,7 +1,8 @@
-import { Component ,OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../app/api.service';
+import { environment } from '../environment/environment';
 
 @Component({
   selector: 'app-login',
@@ -15,56 +16,45 @@ export class LoginComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
-  constructor(private fb: FormBuilder,private apiService: ApiService) {
+  constructor(private fb: FormBuilder, private apiService: ApiService) {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required],
+      username: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
   }
+
   ngOnInit(): void {}
-  setCookie(name: string, value: boolean) {
-    document.cookie = `${name}=${value}`;
-  }
-  getCookie(name: string): string | null {
-    const nameEQ = `${name}=`;
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      let c = cookies[i];
-      while (c.charAt(0) === ' ') c = c.substring(1, c.length);  // Remove leading spaces
-      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);  // Return cookie value
-    }
-    return null;  // Cookie not found
-  }
-  deleteCookie(name: string) {
-    document.cookie = `${name}=false`;
-  }
-  
-  
-  
+
   onLogin(): void {
-    if (this.loginForm.valid) {
-      const loginCredentials = {
-        email: this.loginForm.value.username,
-        password: this.loginForm.value.password
-      };
-      this.apiService.login(loginCredentials).subscribe({
-        next: (response) => {
-          console.log('User logged in successfully:', response);
-          this.successMessage = 'User logged in successfully.';
-          this.setCookie (loginCredentials.email,true);
-          setTimeout(() => {
-            window.location.href = 'http://localhost:8080/ ';
-          }, 2000); 
-          
-          
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          this.errorMessage = error.error.message || 'An error occurred. Please try again.';
-        },
-      });
-    } else {
-      console.log('Form is invalid');
+    if (!this.loginForm.valid) {
+      return;
     }
+
+    const loginCredentials = {
+      email: this.loginForm.value.username,
+      password: this.loginForm.value.password
+    };
+
+    this.apiService.login(loginCredentials).subscribe({
+      next: (response) => {
+        const token = response?.access_token;
+        // Persist the token (shared with the Vue game on the same origin in
+        // production) and hand off to the game, passing the token via the URL
+        // so it also works cross-origin in local dev (4200 -> 8080).
+        if (token) {
+          localStorage.setItem('auth_token', token);
+        }
+        this.successMessage = 'Logged in successfully. Redirecting to the game…';
+        setTimeout(() => {
+          const separator = environment.gameUrl.includes('?') ? '&' : '?';
+          window.location.href = token
+            ? `${environment.gameUrl}${separator}token=${encodeURIComponent(token)}`
+            : environment.gameUrl;
+        }, 1200);
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'An error occurred. Please try again.';
+      },
+    });
   }
 }

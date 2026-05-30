@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
 // Games resource - manages game states and actions
 Route::middleware('auth:sanctum')->group(function() {
-    Route::apiResource('games', GameController::class);
+    Route::apiResource('games', GameController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::post('/games/{game}/guesses', [GameController::class, 'makeGuess']);
 });
 

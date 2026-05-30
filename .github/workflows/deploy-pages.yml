@@ -1,0 +1,93 @@
+name: Deploy frontends to GitHub Pages
+
+# Builds both SPAs from this monorepo and publishes them to a single Pages site:
+#   Angular -> /<repo>/app    Vue game -> /<repo>/game
+# All URLs/paths come from the `github-pages` Environment (Settings -> Environments).
+# Swap `vars.` for `secrets.` below if you prefer to store them as secrets.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    env:
+      BACKEND_API_BASE: ${{ vars.BACKEND_API_BASE || 'https://YOUR-BACKEND-DOMAIN/api' }}
+      APP_BASE_HREF: ${{ vars.APP_BASE_HREF || '/Hangman-Web-App/app/' }}
+      GAME_PUBLIC_PATH: ${{ vars.GAME_PUBLIC_PATH || '/Hangman-Web-App/game/' }}
+      GAME_URL: ${{ vars.GAME_URL || 'https://lynx1097.github.io/Hangman-Web-App/game/' }}
+      LOGIN_URL: ${{ vars.LOGIN_URL || 'https://lynx1097.github.io/Hangman-Web-App/app/#/login' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ---------- Angular (hg-front-game) ----------
+      - name: Generate Angular production environment
+        working-directory: hg-front-game
+        run: |
+          cat > src/environment/environment.prod.ts <<EOF
+          export const environment = {
+            production: true,
+            apiUrl: '${BACKEND_API_BASE}',
+            gameUrl: '${GAME_URL}',
+          };
+          EOF
+
+      - name: Build Angular
+        working-directory: hg-front-game
+        run: |
+          npm ci
+          npm run build -- --configuration production --base-href "${APP_BASE_HREF}"
+
+      # ---------- Vue (hangman-game) ----------
+      - name: Build Vue game
+        working-directory: hangman-game
+        run: |
+          npm ci
+          VUE_APP_PUBLIC_PATH="${GAME_PUBLIC_PATH}" \
+          VUE_APP_API_BASE="${BACKEND_API_BASE}" \
+          VUE_APP_LOGIN_URL="${LOGIN_URL}" \
+          npm run build
+
+      # ---------- Assemble the Pages artifact ----------
+      - name: Assemble _site
+        run: |
+          mkdir -p _site/app _site/game
+          cp -r hg-front-game/dist/ng-hangman/browser/* _site/app/
+          cp -r hangman-game/dist/* _site/game/
+          touch _site/.nojekyll
+          cat > _site/index.html <<'EOF'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>Hangman Web App</title>
+          <meta http-equiv="refresh" content="0; url=./app/"></head>
+          <body>Redirecting to <a href="./app/">the app</a>…</body></html>
+          EOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
