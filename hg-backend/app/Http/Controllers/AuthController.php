@@ -49,6 +49,11 @@ class AuthController extends Controller
             'message' => 'Registration successful',
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
         ], 201);
     }
 
@@ -81,6 +86,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => [
+                'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
             ]

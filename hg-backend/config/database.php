@@ -56,8 +56,11 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // TiDB Cloud requires TLS. Default to the system CA bundle that the
+            // Docker image installs (ca-certificates), so the connection still
+            // negotiates TLS even if MYSQL_ATTR_SSL_CA is not set in the env.
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA', '/etc/ssl/certs/ca-certificates.crt'),
             ]) : [],
         ],
 

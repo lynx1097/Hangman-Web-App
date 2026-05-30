@@ -38,4 +38,12 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 RUN chown -R www-data:www-data /var/www/html \
  && chmod -R 775 storage bootstrap/cache
 
+# Entrypoint runs migrations + caches config at container start (when Render
+# has injected the env vars), then starts Apache.
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 10000
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]

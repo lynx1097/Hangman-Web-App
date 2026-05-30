@@ -11,9 +11,8 @@ Route::post('/auth/register',[AuthController::class,'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Users resource - handles user management
-Route::post('/users', [UserController::class, 'store']); // Registration
-Route::resource('users', UserController::class);
+// Users resource - self-service account management (registration is /auth/register).
+// All routes are authenticated; the controller enforces "self only".
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/users/{user}', [UserController::class, 'show']);
     Route::put('/users/{user}', [UserController::class, 'update']);
