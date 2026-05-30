@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../app/api.service';
 import { environment } from '../environment/environment';
+import { TOKEN_KEY } from '../app/auth.interceptor';
 
 @Component({
   selector: 'app-login',
@@ -42,7 +43,10 @@ export class LoginComponent implements OnInit {
         // production) and hand off to the game, passing the token via the URL
         // so it also works cross-origin in local dev (4200 -> 8080).
         if (token) {
-          localStorage.setItem('auth_token', token);
+          localStorage.setItem(TOKEN_KEY, token);
+        }
+        if (response?.user?.id) {
+          localStorage.setItem('user_id', String(response.user.id));
         }
         this.successMessage = 'Logged in successfully. Redirecting to the game…';
         setTimeout(() => {

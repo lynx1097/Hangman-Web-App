@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     env:
-      BACKEND_API_BASE: ${{ vars.BACKEND_API_BASE || 'https://YOUR-BACKEND-DOMAIN/api' }}
+      BACKEND_API_BASE: ${{ vars.BACKEND_API_BASE || 'https://hangman-web-app.onrender.com/api' }}
       APP_BASE_HREF: ${{ vars.APP_BASE_HREF || '/Hangman-Web-App/app/' }}
       GAME_PUBLIC_PATH: ${{ vars.GAME_PUBLIC_PATH || '/Hangman-Web-App/game/' }}
       GAME_URL: ${{ vars.GAME_URL || 'https://lynx1097.github.io/Hangman-Web-App/game/' }}

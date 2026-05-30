@@ -20,7 +20,12 @@ export class SignupComponent implements OnInit {
     this.signupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      // Mirror the backend rule: min 8, upper + lower + number + symbol.
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/),
+      ]],
       confirmPassword: ['', [Validators.required]],
     }, { validators: this.passwordsMatch });
   }

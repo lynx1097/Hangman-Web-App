@@ -1,13 +1,15 @@
 <div class="profile-page">
-    <h2>Profile</h2>
-    <div class="profile-info">
-      <img [src]="userData.picture" alt="Profile Picture" class="profile-picture" />
-      <p><strong>Username:</strong> {{ userData.username }}</p>
-      <p><strong>Name:</strong> {{ userData.name }}</p>
-      <p><strong>Email:</strong> {{ userData.email }}</p>
-      <p><strong>Credit Card:</strong> {{ userData.creditCard }}</p>
-      <p><strong>Preferences:</strong> {{ userData.preferences }}</p>
-      <p><strong>Highest Score:</strong> {{ userData.highestScore }}</p>
-    </div>
+  <h2>Profile</h2>
+
+  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+  <div class="profile-info" *ngIf="!errorMessage">
+    <p><strong>Name:</strong> {{ user.name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Total Score:</strong> {{ stats.total_score ?? 0 }}</p>
+    <p><strong>Games Won:</strong> {{ stats.games_won ?? 0 }}</p>
+    <p><strong>Games Played:</strong> {{ stats.games_played ?? 0 }}</p>
   </div>
-  
+
+  <button type="button" (click)="logout()">Log out</button>
+</div>

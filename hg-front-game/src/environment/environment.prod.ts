@@ -4,6 +4,6 @@
 // game URLs never live in the repo.
 export const environment = {
   production: true,
-  apiUrl: 'https://YOUR-BACKEND-DOMAIN/api',
+  apiUrl: 'https://hangman-web-app.onrender.com/api',
   gameUrl: 'https://lynx1097.github.io/Hangman-Web-App/game/',
 };

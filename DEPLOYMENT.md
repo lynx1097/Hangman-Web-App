@@ -22,7 +22,7 @@ The workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pag
 
    | Key | Value |
    |-----|-------|
-   | `BACKEND_API_BASE` | `https://YOUR-BACKEND-DOMAIN/api` _(set once the backend host is chosen)_ |
+   | `BACKEND_API_BASE` | `https://hangman-web-app.onrender.com/api` _(set once the backend host is chosen)_ |
    | `APP_BASE_HREF` | `/Hangman-Web-App/app/` |
    | `GAME_PUBLIC_PATH` | `/Hangman-Web-App/game/` |
    | `GAME_URL` | `https://lynx1097.github.io/Hangman-Web-App/game/` |

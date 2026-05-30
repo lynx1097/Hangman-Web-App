@@ -15,5 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // This is a JSON API: always return a 401 for unauthenticated requests
+        // instead of trying to redirect to a (non-existent) "login" route.
+        $exceptions->shouldRenderJsonWhen(fn () => true);
     })->create();
