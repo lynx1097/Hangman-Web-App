@@ -5,4 +5,10 @@ module.exports = defineConfig({
   // Served under a sub-path on GitHub Pages (e.g. /Hangman-Web-App/game/).
   // CI sets VUE_APP_PUBLIC_PATH; local dev falls back to root.
   publicPath: process.env.VUE_APP_PUBLIC_PATH || '/',
+  chainWebpack: (config) => {
+    config.plugin('html').tap((args) => {
+      args[0].title = 'Hangman';
+      return args;
+    });
+  },
 });

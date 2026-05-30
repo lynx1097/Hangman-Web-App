@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../app/api.service';
+import { environment } from '../environment/environment';
 import { TOKEN_KEY } from '../app/auth.interceptor';
 
 @Component({
@@ -35,6 +36,18 @@ export class ProfileComponent implements OnInit {
       next: (stats) => { this.stats = stats; this.loading = false; },
       error: () => { this.loading = false; },
     });
+  }
+
+  get initial(): string {
+    return (this.user.name || '?').charAt(0).toUpperCase();
+  }
+
+  playGame(): void {
+    window.location.href = environment.gameUrl;
+  }
+
+  goHome(): void {
+    this.router.navigate(['/home']);
   }
 
   logout(): void {

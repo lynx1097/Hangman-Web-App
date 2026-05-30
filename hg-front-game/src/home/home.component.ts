@@ -8,19 +8,17 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent {
-  
   constructor(private router: Router) {}
- /*  openGame() {
-    window.location.href = 'http://localhost:8080/ ';
-  } */
-  navigateToLogin(){
+
+  navigateToLogin(): void {
     this.router.navigate(['/login']);
   }
-  navigateToSignup(){
+
+  navigateToSignup(): void {
     this.router.navigate(['/signup']);
   }
-  navigateToProfile() {
+
+  navigateToProfile(): void {
     this.router.navigate(['/profile']);
   }
-
 }

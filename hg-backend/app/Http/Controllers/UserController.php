@@ -61,11 +61,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
-            'password' => [
-                'required',
-                'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
-            ],
+            'password' => ['required', 'confirmed', Password::min(6)],
         ]);
 
         if (!Hash::check($validated['current_password'], $user->password)) {

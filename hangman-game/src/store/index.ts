@@ -109,7 +109,6 @@ const store = createStore<RootState>({
     gameWon: (state): boolean => state.status === 'won',
     gameLost: (state): boolean => state.status === 'lost',
     isFinished: (state): boolean => state.status === 'won' || state.status === 'lost',
-    hangmanImageIndex: (state): number => Math.min(state.wrongGuesses, state.maxWrongGuesses),
   },
 
   mutations: {

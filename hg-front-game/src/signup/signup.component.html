@@ -1,81 +1,61 @@
-<div class="signup-form">
-  <h2>Signup</h2>
-  <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" aria-labelledby="signup-form-title">
-    <div class="form-group">
-      <label for="name">Name:</label>
-      <input 
-        id="name" 
-        formControlName="name" 
-        type="text" 
-        required 
-        aria-required="true" 
-        placeholder="Enter your name" 
-        class="form-control" 
-      />
-      <div *ngIf="signupForm.get('name')?.invalid && signupForm.get('name')?.touched" class="error">
-        Name is required.
-      </div>
-    </div>
+<div class="auth-wrap">
+  <div class="auth-card card">
+    <h2>Create your account</h2>
+    <p class="subtitle">Join and start climbing the leaderboard.</p>
 
-    <div class="form-group">
-      <label for="email">Email:</label>
-      <input 
-        id="email" 
-        formControlName="email" 
-        type="email" 
-        required 
-        aria-required="true" 
-        placeholder="Enter your email" 
-        class="form-control" 
-      />
-      <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched" class="error">
-        A valid email is required.
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" formControlName="name" type="text" placeholder="Your name" />
+        <div *ngIf="signupForm.get('name')?.invalid && signupForm.get('name')?.touched" class="error">
+          Name must be at least 3 characters.
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="password">Password:</label>
-      <input 
-        id="password" 
-        formControlName="password" 
-        type="password" 
-        required 
-        aria-required="true" 
-        placeholder="Enter your password" 
-        class="form-control" 
-      />
-      <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="error">
-        Password is required.
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" type="email" placeholder="you@example.com" />
+        <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched" class="error">
+          A valid email is required.
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="confirmPassword">Confirm Password:</label>
-      <input 
-        id="confirmPassword" 
-        formControlName="confirmPassword" 
-        type="password" 
-        required 
-        aria-required="true" 
-        placeholder="Re-enter your password" 
-        class="form-control" 
-      />
-      <div *ngIf="signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched" class="error">
-        Please confirm your password.
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" formControlName="password" type="password" placeholder="At least 6 characters" />
+        <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="error">
+          Password must be at least 6 characters.
+        </div>
       </div>
+
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <input id="confirmPassword" formControlName="confirmPassword" type="password" placeholder="Re-enter password" />
+        <div *ngIf="signupForm.hasError('passwordsMismatch') && signupForm.get('confirmPassword')?.touched" class="error">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="signupForm.invalid || loading" class="btn full">Sign Up</button>
+
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+    </form>
+
+    <p class="switch">Already have an account? <a (click)="goToLogin()">Log in</a></p>
+  </div>
+</div>
+
+<div class="overlay" *ngIf="loading">
+  <div class="overlay-inner">
+    <div class="spinner" aria-hidden="true">
+      <span></span><span></span><span></span>
     </div>
-    <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
-    <div *ngIf="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
-    <button 
-      type="submit" 
-      [disabled]="signupForm.invalid" 
-      [attr.aria-disabled]="signupForm.invalid ? 'true' : 'false'" 
-      class="btn btn-primary">
-      Sign Up
-    </button>
-  </form>
+    <h3>Creating your account…</h3>
+    <p class="tip">{{ tips[tipIndex] }}</p>
+    <p class="honest">
+      Heads up: our server sleeps on a free plan to keep costs down, so the very
+      first request can take up to a minute to wake it. Thanks for your patience! 💜
+    </p>
+  </div>
 </div>

@@ -17,14 +17,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => [
-                'required',
-                'confirmed',  // Requires password_confirmation field
-                Password::min(8)  // Minimum length of 8 characters
-                    ->mixedCase()  // Requires both uppercase and lowercase letters
-                    ->numbers()    // Requires at least one number
-                    ->symbols()    // Requires at least one symbol
-            ],
+            'password' => ['required', 'confirmed', Password::min(6)],
         ]);
 
         // Create user with hashed password
@@ -102,28 +95,11 @@ class AuthController extends Controller
             'message' => 'Successfully logged out'
         ]);
     }
-    public function isloggedin(Request $request)
-    {
-        $currtoken = $request->user()->currentAccessToken();
-        if ($currtoken === NULL) {
-            return response()->json([
-                'message' => 'User is not logged in'
-            ]);
-        }
-    }
-
     public function changePassword(Request $request)
     {
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
-            'password' => [
-                'required',
-                'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-            ],
+            'password' => ['required', 'confirmed', Password::min(6)],
         ]);
 
         // Check if current password matches

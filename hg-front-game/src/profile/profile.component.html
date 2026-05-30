@@ -1,15 +1,33 @@
-<div class="profile-page">
-  <h2>Profile</h2>
+<div class="profile-wrap">
+  <div class="profile-card card">
+    <div class="avatar">{{ initial }}</div>
 
-  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+    <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
 
-  <div class="profile-info" *ngIf="!errorMessage">
-    <p><strong>Name:</strong> {{ user.name }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Total Score:</strong> {{ stats.total_score ?? 0 }}</p>
-    <p><strong>Games Won:</strong> {{ stats.games_won ?? 0 }}</p>
-    <p><strong>Games Played:</strong> {{ stats.games_played ?? 0 }}</p>
+    <ng-container *ngIf="!errorMessage">
+      <h2>{{ user.name }}</h2>
+      <p class="email">{{ user.email }}</p>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="num">{{ stats.total_score ?? 0 }}</span>
+          <span class="lbl">Score</span>
+        </div>
+        <div class="stat">
+          <span class="num">{{ stats.games_won ?? 0 }}</span>
+          <span class="lbl">Won</span>
+        </div>
+        <div class="stat">
+          <span class="num">{{ stats.games_played ?? 0 }}</span>
+          <span class="lbl">Played</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="actions">
+      <button class="btn btn-accent" (click)="playGame()">Play Game</button>
+      <button class="btn btn-ghost" (click)="goHome()">Home</button>
+      <button class="btn btn-ghost" (click)="logout()">Log out</button>
+    </div>
   </div>
-
-  <button type="button" (click)="logout()">Log out</button>
 </div>

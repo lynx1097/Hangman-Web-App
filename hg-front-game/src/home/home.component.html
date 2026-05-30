@@ -1,24 +1,50 @@
-<div class="home-page">
-    <header>
-      <div class="auth-buttons">
-        <button class="btn login-btn" (click)="navigateToLogin()">Login</button>
-        <button class="btn signup-btn" (click)="navigateToSignup()">Sign Up</button>
-        <!--button class="btn signup-btn" (click)="navigateToProfile()">Go to Profile</button>
-        <button class="btn login-btn" (click)="openGame()">New Game</button-->
-      </div>
-        <img [src]="'logo.jpg'" alt="image">
-      <p>
-        Hangman is a fun and educational game where you try to guess the letters
-        in a word within a limited number of attempts. Each incorrect guess brings
-        the hangman closer to completion, Try to guess the word before the hangman is fully drawn!
-      </p>
-    </header>
-  
-    
-  </div>
+<div class="home">
+  <header class="hero card">
+    <div class="hero-art">
+      <!-- Animated, swinging hangman (pure SVG/CSS, no image assets) -->
+      <svg viewBox="0 0 140 180" class="gallows" aria-hidden="true">
+        <g stroke="#fbbf24" stroke-width="5" stroke-linecap="round" fill="none">
+          <line x1="15" y1="170" x2="95" y2="170" />
+          <line x1="40" y1="170" x2="40" y2="15" />
+          <line x1="40" y1="15" x2="105" y2="15" />
+          <line x1="105" y1="15" x2="105" y2="32" />
+        </g>
+        <g class="figure" stroke="#f5f3ff" stroke-width="4" stroke-linecap="round" fill="none">
+          <circle cx="105" cy="45" r="13" />
+          <line x1="105" y1="58" x2="105" y2="100" />
+          <line x1="105" y1="70" x2="90" y2="88" />
+          <line x1="105" y1="70" x2="120" y2="88" />
+          <line x1="105" y1="100" x2="92" y2="124" />
+          <line x1="105" y1="100" x2="118" y2="124" />
+        </g>
+      </svg>
+    </div>
 
-  <div class="home-page">
-    
-  </div>
-  
-  
+    <h1>Hangman</h1>
+    <p class="tagline">Guess the word, one letter at a time — before the figure is complete.</p>
+
+    <div class="auth-buttons">
+      <button class="btn" (click)="navigateToLogin()">Login</button>
+      <button class="btn btn-accent" (click)="navigateToSignup()">Sign Up</button>
+      <button class="btn btn-ghost" (click)="navigateToProfile()">Profile</button>
+    </div>
+  </header>
+
+  <section class="features">
+    <div class="feature card">
+      <span class="emoji">🧠</span>
+      <h3>Sharpen your mind</h3>
+      <p>Vocabulary and quick thinking, wrapped in a classic game.</p>
+    </div>
+    <div class="feature card">
+      <span class="emoji">🏆</span>
+      <h3>Climb the leaderboard</h3>
+      <p>Every win is scored. Track your stats on your profile.</p>
+    </div>
+    <div class="feature card">
+      <span class="emoji">⌨️</span>
+      <h3>Type or tap</h3>
+      <p>Play with your keyboard or click the on-screen letters.</p>
+    </div>
+  </section>
+</div>

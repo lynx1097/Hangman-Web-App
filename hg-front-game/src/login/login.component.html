@@ -1,35 +1,47 @@
-<div class="login-page">
-    <h2>Login</h2>
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" aria-labelledby="signup-form-title">
-      <div>
-        <label for="username">Email:</label>
-        <input id="username" formControlName="username" type="text" required />
+<div class="auth-wrap">
+  <div class="auth-card card">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Log in to start guessing.</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="field">
+        <label for="username">Email</label>
+        <input id="username" formControlName="username" type="email" placeholder="you@example.com" />
         <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error">
-          Username is required
+          A valid email is required.
         </div>
       </div>
-      
-      <div>
-        <label for="password">Password:</label>
-        <input id="password" formControlName="password" type="password" required />
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" formControlName="password" type="password" placeholder="••••••••" />
         <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error">
-          Password is required
+          Password is required.
         </div>
       </div>
-  
-      <button 
-      type="submit" 
-      [disabled]="loginForm.invalid" 
-      [attr.aria-disabled]="loginForm.invalid ? 'true' : 'false'" 
-      class="btn btn-primary">
-      Login
-      </button>
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-      <div *ngIf="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid || loading" class="btn full">Login</button>
+
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
     </form>
+
+    <p class="switch">New here? <a (click)="goToSignup()">Create an account</a></p>
   </div>
-  
+</div>
+
+<!-- Cold-start loading overlay: the backend runs on a free tier and may need
+     a moment to wake up, so we keep the player entertained and honest. -->
+<div class="overlay" *ngIf="loading">
+  <div class="overlay-inner">
+    <div class="spinner" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <h3>Warming up the game…</h3>
+    <p class="tip">{{ tips[tipIndex] }}</p>
+    <p class="honest">
+      Heads up: our server sleeps on a free plan to keep costs down, so the very
+      first request can take up to a minute to wake it. Thanks for your patience! 💜
+    </p>
+  </div>
+</div>
