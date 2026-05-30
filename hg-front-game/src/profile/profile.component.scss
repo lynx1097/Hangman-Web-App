@@ -78,3 +78,25 @@ h2 {
   color: var(--danger);
   margin-bottom: 20px;
 }
+
+@media (max-width: 600px) {
+  .profile-wrap {
+    padding: 32px 14px;
+  }
+
+  .profile-card {
+    padding: 28px 20px;
+  }
+
+  .stats {
+    gap: 10px;
+  }
+
+  .stat .num {
+    font-size: 1.4rem;
+  }
+
+  .actions .btn {
+    flex: 1 1 100%;
+  }
+}

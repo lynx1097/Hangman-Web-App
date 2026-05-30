@@ -396,4 +396,37 @@ h1 {
   0%, 80%, 100% { transform: scale(0.5); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
 }
+
+@media (max-width: 600px) {
+  .hangman {
+    padding: 0 4px;
+  }
+
+  .board {
+    padding: 20px 14px 24px;
+  }
+
+  .gallows {
+    width: 150px;
+  }
+
+  .word {
+    font-size: 1.8rem;
+    letter-spacing: 0.25rem;
+  }
+
+  /* A 13-wide row is too cramped on phones — drop to 7 columns. */
+  .keypad {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+
+  .key {
+    padding: 14px 0;
+  }
+
+  .status-line {
+    font-size: 0.85rem;
+  }
+}
 </style>
