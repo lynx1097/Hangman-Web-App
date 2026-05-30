@@ -37,6 +37,10 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/users/${userId}`);
   }
 
+  updatePassword(userId: string, data: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/users/${userId}/password`, data);
+  }
+
   // Games
   getGames(): Observable<any> {
     return this.http.get(`${this.baseUrl}/games`);

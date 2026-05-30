@@ -27,8 +27,9 @@ export default class App extends Vue {}
   --accent: #fcd34d;
   --danger: #fb7185;
   --success: #34d399;
+  /* Lighter, higher-contrast reading colours. */
   --text: #ffffff;
-  --muted: #d6dcf5;
+  --muted: #f0f2fc;
 
   --font-display: "Playwrite NZ Basic", cursive;
   --font-body: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
@@ -57,7 +58,50 @@ body {
   background-attachment: fixed;
 }
 
+/* Slowly drifting glow — an ambient, living backdrop. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(129, 140, 248, 0.18), transparent 40%),
+    radial-gradient(circle at 70% 65%, rgba(252, 211, 77, 0.10), transparent 45%);
+  animation: drift 24s ease-in-out infinite alternate;
+}
+
+/* Faint moving dot texture layered over the gradient. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  animation: texture 32s linear infinite;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(4%, 3%) rotate(8deg); }
+}
+
+@keyframes texture {
+  from { background-position: 0 0; }
+  to { background-position: 28px 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+  }
+}
+
 #app {
+  position: relative;
+  z-index: 1;
   text-align: center;
   padding: 32px 16px 56px;
 }

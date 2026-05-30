@@ -18,6 +18,10 @@ export class HomeComponent {
     this.router.navigate(['/signup']);
   }
 
+  navigateToLeaderboard(): void {
+    this.router.navigate(['/leaderboard']);
+  }
+
   navigateToProfile(): void {
     this.router.navigate(['/profile']);
   }

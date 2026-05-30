@@ -1,0 +1,41 @@
+<div class="lb-wrap">
+  <div class="card lb-card">
+    <h2>🏆 Leaderboard</h2>
+    <p class="subtitle">Top players by total score</p>
+
+    <p *ngIf="error" class="error-message">{{ error }}</p>
+
+    <div *ngIf="loading" class="loading">Loading…</div>
+
+    <ng-container *ngIf="!loading && !error">
+      <p *ngIf="entries.length === 0" class="empty">
+        No scores yet — be the first to win a game!
+      </p>
+
+      <table *ngIf="entries.length > 0" class="lb-table">
+        <thead>
+          <tr>
+            <th class="rank">#</th>
+            <th>Player</th>
+            <th class="num">Score</th>
+            <th class="num">Won</th>
+            <th class="num">Played</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of entries; let i = index" [class.podium]="i < 3">
+            <td class="rank">{{ medal(i) }}</td>
+            <td class="player">{{ e.name || 'Player' }}</td>
+            <td class="num score">{{ e.total_score ?? 0 }}</td>
+            <td class="num">{{ e.games_won ?? 0 }}</td>
+            <td class="num">{{ e.games_played ?? 0 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+
+    <div class="actions">
+      <button class="btn btn-ghost" (click)="goHome()">Home</button>
+    </div>
+  </div>
+</div>

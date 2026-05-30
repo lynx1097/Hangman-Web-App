@@ -45,6 +45,15 @@
         <p class="status-line">
           <strong>Attempts left:</strong> {{ remainingAttempts }} / {{ maxWrongGuesses }}
           &nbsp;•&nbsp;
+          <strong>⏱ Time:</strong>
+          <span :class="{ 'near-miss': nearMiss }">{{ formattedTime }}</span>
+        </p>
+
+        <p v-if="nearMiss && isPlaying" class="near-miss-banner">
+          🔥 One mistake left — finish now for a big near-miss bonus!
+        </p>
+
+        <p class="status-line">
           <strong>Guessed:</strong> {{ guessedLetters.join(', ') || '—' }}
         </p>
 
@@ -65,7 +74,8 @@
         <!-- Result -->
         <div v-if="isFinished" class="result" :class="{ won: gameWon, lost: gameLost }">
           <h2>{{ gameWon ? 'You Won! 🎉' : 'Game Over' }}</h2>
-          <p v-if="gameWon">Score: {{ score }}</p>
+          <p v-if="gameWon" class="final-score">Score: {{ score }}</p>
+          <p class="final-time">Finished in {{ formattedTime }}</p>
           <p>The word was: <strong>{{ revealedWord }}</strong></p>
           <button class="btn btn-accent" @click="newGame">Play Again</button>
         </div>
@@ -88,7 +98,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted, onUnmounted, ref } from 'vue';
+import { defineComponent, computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { RootState, LOGIN_URL } from '@/store';
 
@@ -114,6 +124,29 @@ export default defineComponent({
     const tipIndex = ref(0);
     let tipTimer: ReturnType<typeof setInterval> | null = null;
 
+    // ---- Front-end clock ----------------------------------------------------
+    // The backend keeps no timer; we measure elapsed seconds here and report
+    // them with each guess so the server can reward speed in the final score.
+    const elapsed = ref(0);
+    let startTime = 0;
+    let clockTimer: ReturnType<typeof setInterval> | null = null;
+
+    const stopClock = () => {
+      if (clockTimer) {
+        clearInterval(clockTimer);
+        clockTimer = null;
+      }
+    };
+
+    const startClock = () => {
+      stopClock();
+      elapsed.value = 0;
+      startTime = Date.now();
+      clockTimer = setInterval(() => {
+        elapsed.value = Math.floor((Date.now() - startTime) / 1000);
+      }, 1000);
+    };
+
     const loading = computed(() => store.state.loading);
     const status = computed(() => store.state.status);
     const isPlaying = computed(() => store.getters.isPlaying);
@@ -123,6 +156,25 @@ export default defineComponent({
     // Full-screen overlay only for the initial spin-up (before any board shows).
     const showOverlay = computed(() => loading.value && status.value === 'idle');
 
+    const remainingAttempts = computed(() => store.state.remainingAttempts);
+    // "Near miss" = one wrong guess away from losing.
+    const nearMiss = computed(() => remainingAttempts.value === 1);
+
+    const formattedTime = computed(() => {
+      const m = Math.floor(elapsed.value / 60);
+      const s = elapsed.value % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    });
+
+    // Start/stop the clock as the game enters and leaves the "in_progress" state.
+    watch(status, (next, prev) => {
+      if (next === 'in_progress' && prev !== 'in_progress') {
+        startClock();
+      } else if (next !== 'in_progress') {
+        stopClock();
+      }
+    });
+
     const newGame = () => store.dispatch('startGame');
 
     // One guess at a time, paced so the backend can keep up.
@@ -131,7 +183,7 @@ export default defineComponent({
       if (busy.value || !isPlaying.value || loading.value) return;
       if (guessedLetters.value.includes(value)) return;
       busy.value = true;
-      await store.dispatch('guess', value);
+      await store.dispatch('guess', { letter: value, elapsedSeconds: elapsed.value });
       setTimeout(() => { busy.value = false; }, GUESS_COOLDOWN_MS);
     };
 
@@ -156,6 +208,7 @@ export default defineComponent({
     onUnmounted(() => {
       window.removeEventListener('keydown', onKeydown);
       if (tipTimer) clearInterval(tipTimer);
+      stopClock();
     });
 
     return {
@@ -167,6 +220,9 @@ export default defineComponent({
       guess,
       busy,
       showOverlay,
+      elapsed,
+      formattedTime,
+      nearMiss,
       // state
       maskedWord: computed(() => store.state.maskedWord),
       hint: computed(() => store.state.hint),
@@ -428,5 +484,35 @@ h1 {
   .status-line {
     font-size: 0.85rem;
   }
+}
+
+/* Timer + near-miss accents (appended) */
+.status-line .near-miss {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.near-miss-banner {
+  color: var(--accent);
+  font-weight: 700;
+  margin: 8px 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.final-score {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 6px 0;
+}
+
+.final-time {
+  color: var(--muted);
+  margin: 4px 0;
 }
 </style>

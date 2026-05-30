@@ -95,6 +95,10 @@ class GameController extends Controller
 
         $validated = $request->validate([
             'letter' => ['required', 'string', 'size:1', 'regex:/^[A-Za-z]$/'],
+            // The optional elapsed_seconds is the front-end's own clock reading.
+            // The backend keeps no timer of its own; it just records what the
+            // client reports so it can reward faster wins in the score.
+            'elapsed_seconds' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $letter = strtoupper($validated['letter']);
@@ -120,10 +124,14 @@ class GameController extends Controller
 
         if ($allRevealed) {
             $game->status = 'won';
-            $game->score = $this->computeScore($game);
         } elseif ($game->wrong_guesses >= self::MAX_WRONG) {
             $game->status = 'lost';
-            $game->score = 0;
+        }
+
+        // When the round ends, lock in the front-end-reported time and the score.
+        if ($game->status !== 'in_progress') {
+            $game->elapsed_seconds = $request->input('elapsed_seconds', $game->elapsed_seconds);
+            $game->score = $game->status === 'won' ? $this->computeScore($game) : 0;
         }
 
         $game->save();
@@ -157,6 +165,7 @@ class GameController extends Controller
             'remaining_attempts' => max(0, self::MAX_WRONG - $game->wrong_guesses),
             'status' => $game->status,
             'score' => $game->score,
+            'elapsed_seconds' => $game->elapsed_seconds,
             'hint' => $game->hint,
             'category' => $game->category,
             'created_at' => $game->created_at,
@@ -171,14 +180,37 @@ class GameController extends Controller
     }
 
     /**
-     * Score awarded for a win: rewards longer words and fewer mistakes.
+     * Score awarded for a finished game.
+     *
+     *  - Base: 10 points per letter.
+     *  - Near-miss multiplier: winning with only one guess to spare is clutch, so
+     *    the base is multiplied by 1 + 0.15 per distinct correct letter uncovered
+     *    (the more of a long word you pull off on the brink, the bigger the reward).
+     *  - Penalty: 5 points per wrong guess.
+     *  - Speed bonus: up to 120 points, shrinking by one for every second the
+     *    front-end clock recorded — the less time you take, the higher the score.
      */
     private function computeScore(Game $game): int
     {
-        $base = strlen($game->word) * 10;
+        $word = $game->word;
+        $base = strlen($word) * 10;
+
+        $multiplier = 1.0;
+        if ($game->status === 'won' && $game->wrong_guesses === self::MAX_WRONG - 1) {
+            $guessed = $game->guessed_letters ?? [];
+            $distinctCorrect = collect(str_split($word))
+                ->unique()
+                ->filter(fn (string $char) => in_array($char, $guessed, true))
+                ->count();
+            $multiplier = 1.0 + ($distinctCorrect * 0.15);
+        }
+
         $penalty = $game->wrong_guesses * 5;
 
-        return max(10, $base - $penalty);
+        $elapsed = max(0, (int) ($game->elapsed_seconds ?? 0));
+        $timeBonus = $elapsed > 0 ? max(0, 120 - $elapsed) : 0;
+
+        return max(10, (int) round($base * $multiplier) - $penalty + $timeBonus);
     }
 
     /**

@@ -18,12 +18,14 @@ class Game extends Model
         'wrong_guesses',
         'status',
         'score',
+        'elapsed_seconds',
     ];
 
     protected $casts = [
         'guessed_letters' => 'array',
         'wrong_guesses'   => 'integer',
         'score'           => 'integer',
+        'elapsed_seconds' => 'integer',
     ];
 
     public function user()

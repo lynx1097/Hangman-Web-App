@@ -148,8 +148,10 @@ const store = createStore<RootState>({
     },
 
     // Send a single-letter guess; the backend checks it against the real word.
-    async guess({ state, commit }, letter: string) {
-      const value = letter.toUpperCase();
+    // The component owns the clock and passes the elapsed seconds along so the
+    // backend can fold speed into the final score.
+    async guess({ state, commit }, payload: { letter: string; elapsedSeconds?: number }) {
+      const value = payload.letter.toUpperCase();
       if (!state.gameId || state.status !== 'in_progress') return;
       if (state.guessedLetters.includes(value)) return;
 
@@ -157,7 +159,7 @@ const store = createStore<RootState>({
       try {
         const response = await axios.post(
           `${API_BASE}/games/${state.gameId}/guesses`,
-          { letter: value },
+          { letter: value, elapsed_seconds: payload.elapsedSeconds ?? 0 },
           { headers: authHeaders(state.token) }
         );
         commit('setGame', response.data);

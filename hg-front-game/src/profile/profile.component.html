@@ -26,8 +26,56 @@
 
     <div class="actions">
       <button class="btn btn-accent" (click)="playGame()">Play Game</button>
+      <button class="btn btn-ghost" (click)="goLeaderboard()">🏆 Leaderboard</button>
       <button class="btn btn-ghost" (click)="goHome()">Home</button>
       <button class="btn btn-ghost" (click)="logout()">Log out</button>
+    </div>
+
+    <!-- Change password -->
+    <div class="panel">
+      <button class="link-btn" (click)="togglePasswordForm()">
+        {{ showPasswordForm ? '▾ Hide password change' : '▸ Change password' }}
+      </button>
+
+      <form *ngIf="showPasswordForm" [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="pw-form">
+        <div class="field">
+          <label>Current password</label>
+          <input type="password" formControlName="current_password" placeholder="Your current password" />
+        </div>
+        <div class="field">
+          <label>New password</label>
+          <input type="password" formControlName="password" placeholder="At least 6 characters" />
+          <p class="field-error"
+             *ngIf="passwordForm.get('password')?.touched && passwordForm.get('password')?.invalid">
+            Password must be at least 6 characters.
+          </p>
+        </div>
+        <div class="field">
+          <label>Confirm new password</label>
+          <input type="password" formControlName="password_confirmation" placeholder="Repeat new password" />
+        </div>
+        <button type="submit" class="btn full" [disabled]="passwordSaving">
+          {{ passwordSaving ? 'Saving…' : 'Update password' }}
+        </button>
+        <p class="success-message" *ngIf="passwordMessage">{{ passwordMessage }}</p>
+        <p class="error" *ngIf="passwordError">{{ passwordError }}</p>
+      </form>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="panel danger-zone">
+      <ng-container *ngIf="!confirmingDelete">
+        <button class="link-btn danger" (click)="confirmingDelete = true">Delete account</button>
+      </ng-container>
+      <ng-container *ngIf="confirmingDelete">
+        <p class="confirm-text">This permanently deletes your account and stats. Are you sure?</p>
+        <div class="confirm-actions">
+          <button class="btn btn-danger" (click)="deleteAccount()" [disabled]="deleting">
+            {{ deleting ? 'Deleting…' : 'Yes, delete' }}
+          </button>
+          <button class="btn btn-ghost" (click)="confirmingDelete = false" [disabled]="deleting">Cancel</button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>
