@@ -6,7 +6,6 @@ import { ProfileComponent } from './profile/profile.component';
 import { LoginComponent } from './login/login.component';
 import { SignupComponent } from './signup/signup.component';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { GameComponent } from './app/game/game.component';
 import { authInterceptor } from './app/auth.interceptor';
 import { authGuard } from './app/auth.guard';
 
@@ -15,7 +14,6 @@ const routes: Routes = [
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
-  { path: 'game' , component: GameComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home' }
 ];
