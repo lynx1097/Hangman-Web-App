@@ -17,7 +17,7 @@ export default class App extends Vue {}
 <style>
 /* Shared Hangman theme — kept in sync with the Angular app (hg-front-game). */
 :root {
-  --bg-1: #0b1020;
+  --bg-1: #c8d4f9;
   --bg-2: #1b1442;
   --surface: rgba(255, 255, 255, 0.09);
   --surface-strong: rgba(255, 255, 255, 0.15);
