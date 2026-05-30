@@ -1,0 +1,16 @@
+# Installed/built artifacts — regenerated in the image
+vendor/
+node_modules/
+public/build/
+
+# Local-only / secrets (Render injects env vars instead)
+.env
+.env.*
+
+# VCS & dev cruft
+.git
+.gitignore
+.gitattributes
+.editorconfig
+tests/
+storage/logs/*
