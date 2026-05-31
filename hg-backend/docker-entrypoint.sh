@@ -18,5 +18,9 @@ php artisan migrate --force || echo "WARNING: migrations failed (check DB_* / MY
 php artisan config:cache || true
 php artisan route:cache || true
 
+# Generate Swagger docs now that the full env is available.
+echo "Generating Swagger docs..."
+php artisan l5-swagger:generate || echo "WARNING: Swagger generation failed."
+
 # Hand off to the image's default command (apache2-foreground).
 exec "$@"
