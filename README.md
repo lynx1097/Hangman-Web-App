@@ -1,4 +1,4 @@
-<h1 align="center">🪢 Hangman — Full-Stack Web Application</h1>
+<h1 align="center">🪢 Hangman  Full-Stack Web Application</h1>
 
 <p align="center">
   <em>A classic word-guessing game, rebuilt as a complete, production-deployed, multi-tier web application.</em>
@@ -21,9 +21,7 @@
 
 ## 📖 About this project
 
-This project was originally built as **coursework for a comprehensive Web Development course**. The brief called for demonstrating the *full breadth* of modern web engineering — a server-side framework, a relational database, token-based authentication, a single-page application framework, reactive state management, REST API design, automated testing, containerization, and cloud deployment.
-
-Rather than ship a single monolithic page, the project embraces that breadth with a **three-application architecture**: a Laravel API backend, an Angular "shell" application (marketing, auth, profile), and a Vue single-page game. The result is a deliberately rich stack — more elaborate than a quick browser game strictly needs — that showcases how independently built, independently deployed front-ends can share one secure backend and feel like a single, cohesive product.
+This project was originally built as **coursework for a comprehensive Web Development course** in December 2024 . and It's revival now for repolishing and adding to portfolio .
 
 > 💡 **A note on the stack:** the architecture is intentionally comprehensive because the course required demonstrating a wide range of technologies. The pay-off is a genuinely decoupled, scalable design where each tier can evolve, scale, and deploy on its own.
 
@@ -41,10 +39,10 @@ Rather than ship a single monolithic page, the project embraces that breadth wit
 <p align="center"><img src="screenshots/login.jpeg" alt="Login page" width="800"></p>
 <p align="center"><img src="screenshots/loading.jpeg" alt="Cold-start entertaining loader" width="800"></p>
 
-### The Game — in progress (Vue)
+### The Game  in progress (Vue)
 <p align="center"><img src="screenshots/game-playing.jpeg" alt="Game in progress" width="800"></p>
 
-### The Game — win / loss states (Vue)
+### The Game  win / loss states (Vue)
 <p align="center"><img src="screenshots/game-won.jpeg" alt="Game won" width="800"></p>
 
 ### Profile & stats (Angular)
@@ -97,18 +95,18 @@ Rather than ship a single monolithic page, the project embraces that breadth wit
 
 ## 🧩 The three applications
 
-### 1. `hg-backend` — Laravel 11 REST API (the source of truth)
+### 1. `hg-backend`  Laravel 11 REST API (the source of truth)
 
-The backend owns **all** game state and secrets. The word being guessed **never leaves the server** until the game ends — clients only ever receive the *masked* word, the hint, and the count of remaining attempts. Every guess is validated and scored server-side, which makes the game impossible to cheat from the browser.
+The backend owns **all** game state and secrets. The word being guessed **never leaves the server** until the game ends  clients only ever receive the *masked* word, the hint, and the count of remaining attempts. Every guess is validated and scored server-side, which makes the game impossible to cheat from the browser.
 
 **Highlights**
 - **Laravel 11** on **PHP 8.2+**, served via **Apache** in a Docker container.
 - **Laravel Sanctum 4** issues stateless **Bearer tokens** on register/login; protected routes sit behind the `auth:sanctum` middleware.
-- **Eloquent ORM** models — `User`, `Game`, `LeaderboardEntry` — with migrations for full schema versioning.
-- **Word sourcing with graceful fallback:** new games pull a word + hint from an external word API, and **transparently fall back to a built-in word list** if the API is unavailable — the game never breaks.
+- **Eloquent ORM** models  `User`, `Game`, `LeaderboardEntry`  with migrations for full schema versioning.
+- **Word sourcing with graceful fallback:** new games pull a word + hint from an external word API, and **transparently fall back to a built-in word list** if the API is unavailable  the game never breaks.
 - **Anti-repetition word selection:** each new game avoids any word the player has already been served (derived from their existing `games` rows), so they cycle through *every* available word once before any repeats. When the pool is exhausted the history is transparently recycled, so a game can always start.
 - **Skill-based scoring** computed entirely server-side: a base score from word length, a **near-miss multiplier** (winning with only one guess left multiplies the score by `1 + 0.15 × distinct correct letters`), a penalty for wrong guesses, and a **speed bonus** derived from the front-end-reported time.
-- **Pure-JSON error handling:** the exception handler always renders JSON (e.g. a clean `401` for unauthenticated requests) instead of attempting HTML redirects — exactly what an API client expects.
+- **Pure-JSON error handling:** the exception handler always renders JSON (e.g. a clean `401` for unauthenticated requests) instead of attempting HTML redirects  exactly what an API client expects.
 - **Self-service, self-only account management:** every `/users/{user}` route verifies the authenticated user is acting on their own account (`403` otherwise).
 - **Automated test suite (Pest):** 11 feature tests, 56 assertions, covering authentication gates, masked-word generation, the API/fallback word source, correct/incorrect guess accounting, win/loss transitions, leaderboard updates, duplicate/invalid-letter rejection, and ownership enforcement.
 
@@ -116,8 +114,8 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 
 | Method | Endpoint                          | Auth | Purpose                                  |
 |--------|-----------------------------------|------|------------------------------------------|
-| `POST` | `/api/auth/register`              | —    | Create account, returns Bearer token     |
-| `POST` | `/api/auth/login`                 | —    | Authenticate, returns Bearer token       |
+| `POST` | `/api/auth/register`              |     | Create account, returns Bearer token     |
+| `POST` | `/api/auth/login`                 |     | Authenticate, returns Bearer token       |
 | `POST` | `/api/auth/logout`                | ✅   | Revoke the current token                 |
 | `GET`  | `/api/users/{user}`               | ✅   | Fetch own profile                        |
 | `PUT`  | `/api/users/{user}`               | ✅   | Update own name/email                    |
@@ -126,10 +124,12 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 | `GET`  | `/api/games`                      | ✅   | List the player's games                  |
 | `POST` | `/api/games`                      | ✅   | Start a new game (returns masked word)   |
 | `POST` | `/api/games/{game}/guesses`       | ✅   | Submit a single-letter guess (+ optional `elapsed_seconds`) |
-| `GET`  | `/api/leaderboard`                | —    | Global leaderboard                       |
+| `GET`  | `/api/leaderboard`                |     | Global leaderboard                       |
 | `GET`  | `/api/leaderboard/users/{user}`   | ✅   | A player's personal stats                |
 
-### 2. `hg-front-game` — Angular 18 application (the shell)
+# ✅ **You can consult and test the API using swagger UI [here](https://hangman-web-app.onrender.com/)**
+
+### 2. `hg-front-game`  Angular 18 application (the shell)
 
 The Angular app is the **front door**: marketing home page, account creation, login, and the player profile. It is a modern **standalone-component** Angular app (no `NgModule` boilerplate).
 
@@ -138,20 +138,20 @@ The Angular app is the **front door**: marketing home page, account creation, lo
 - **Functional HTTP interceptor** automatically attaches the `Authorization: Bearer <token>` header to every request and, on a `401`, clears the token and bounces the user to login.
 - **Functional route guard** protects the profile route from unauthenticated access.
 - **Hash-based routing** so deep links and page refreshes work correctly on GitHub Pages (which has no server-side rewrites).
-- **Animated, asset-free hero:** the gallows on the home page is a hand-built, gently swinging **SVG** — no image files.
+- **Animated, asset-free hero:** the gallows on the home page is a hand-built, gently swinging **SVG**  no image files.
 - **Honest, entertaining cold-start loader:** because the backend runs on a free tier that sleeps, the first request can take up to a minute. Instead of a frozen screen, the user sees an animated loader with **rotating gameplay tips** and a friendly, transparent note explaining the wake-up delay.
 - **Profile dashboard** with avatar initial, total score, games won, and games played pulled live from the API.
-- **Full account self-service:** a dedicated **leaderboard page** (global rankings with medals for the top three), an in-profile **change-password** form (verifies the current password), and a confirm-gated **delete-account** flow — every backend account API is now surfaced in the UI.
+- **Full account self-service:** a dedicated **leaderboard page** (global rankings with medals for the top three), an in-profile **change-password** form (verifies the current password), and a confirm-gated **delete-account** flow  every backend account API is now surfaced in the UI.
 - **Auth-aware navigation:** the home page shows **Login / Sign Up** when signed out and swaps to a **Profile** button once a token is present, so the entry points always match the player's state.
 
-### 3. `hangman-game` — Vue 3 single-page game (the playground)
+### 3. `hangman-game`  Vue 3 single-page game (the playground)
 
-The Vue app is where the game actually happens — a focused, reactive SPA.
+The Vue app is where the game actually happens  a focused, reactive SPA.
 
 **Highlights**
 - **Vue 3** with **Vuex 4** for centralized game state and **Axios** for API calls.
-- **Fully animated SVG hangman:** the six body parts fade and scale into place as wrong guesses accumulate (and turn red on a loss) — replacing the old static image sequence entirely.
-- **Dual input — keyboard *and* touch:** players can **type a letter** or tap the on-screen keypad. Keyboard input is rate-limited to **one letter at a time with a deliberate cooldown**, giving the backend room to validate and respond before the next guess is accepted — smooth on fast typing, friendly to the network round-trip.
+- **Fully animated SVG hangman:** the six body parts fade and scale into place as wrong guesses accumulate (and turn red on a loss)  replacing the old static image sequence entirely.
+- **Dual input  keyboard *and* touch:** players can **type a letter** or tap the on-screen keypad. Keyboard input is rate-limited to **one letter at a time with a deliberate cooldown**, giving the backend room to validate and respond before the next guess is accepted  smooth on fast typing, friendly to the network round-trip.
 - **Auto-start:** an authenticated player who lands on the game immediately gets a fresh word.
 - **Live game timer:** the game runs its own clock (the backend keeps no timer) and reports the elapsed seconds with each guess, so a faster win earns a bigger score; the final time is shown on the result card.
 - **Near-miss tension:** when a player is one wrong guess from losing, an animated banner flags the chance for a big near-miss scoring bonus.
@@ -166,17 +166,17 @@ The apps are **independently built and deployed**, yet they behave as one produc
 
 1. **A single shared backend & token.** Both front-ends speak to the same Laravel REST API. On successful login, the Angular app stores the Sanctum **Bearer token** in `localStorage` under a shared key (`auth_token`). The Vue game reads that same key.
 
-2. **A cross-origin token handoff.** In production both front-ends live on the same GitHub Pages origin, so `localStorage` is shared directly. To also work in local development (Angular on `:4200`, Vue on `:8080`, different origins), the Angular login **appends the token to the redirect URL** (`?token=…`); the Vue game reads it from the query string on load, persists it, and **cleans the URL** — so the handoff is seamless in both environments.
+2. **A cross-origin token handoff.** In production both front-ends live on the same GitHub Pages origin, so `localStorage` is shared directly. To also work in local development (Angular on `:4200`, Vue on `:8080`, different origins), the Angular login **appends the token to the redirect URL** (`?token=…`); the Vue game reads it from the query string on load, persists it, and **cleans the URL**  so the handoff is seamless in both environments.
 
-3. **A shared visual identity.** Both front-ends use the **same design tokens** — colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font — defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app. Both apps also share an **animated ambient background** (a slowly drifting glow plus a faint moving dot texture, with `prefers-reduced-motion` respected) and a lightened, higher-contrast text palette for comfortable reading.
+3. **A shared visual identity.** Both front-ends use the **same design tokens**  colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font  defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app. Both apps also share an **animated ambient background** (a slowly drifting glow plus a faint moving dot texture, with `prefers-reduced-motion` respected) and a lightened, higher-contrast text palette for comfortable reading.
 
 ---
 
 ## 🛡️ Security & fair-play design
 
-- **The word is never sent to the client** while a game is in progress — only the masked form and hint. Guessing logic and scoring are entirely server-side, so the game cannot be cheated from the browser dev tools.
+- **The word is never sent to the client** while a game is in progress  only the masked form and hint. Guessing logic and scoring are entirely server-side, so the game cannot be cheated from the browser dev tools.
 - **Stateless Bearer-token auth** via Sanctum; protected endpoints reject missing/expired tokens with a clean `401`.
-- **Self-only authorization** on every account and game route — one user can never read or mutate another's data.
+- **Self-only authorization** on every account and game route  one user can never read or mutate another's data.
 - **TLS-secured database** connection to TiDB Cloud.
 - **CORS** is handled by a single, centrally configured source (Laravel's CORS middleware), with the allowed origin driven by an environment variable.
 
@@ -201,7 +201,7 @@ Each tier deploys to the platform best suited to it:
 ### Backend → Render (Docker)
 - Built from a **Dockerfile** (`php:8.3` + Apache) and deployed straight from the `hg-backend/` directory.
 - A **container entrypoint script** runs database migrations (`php artisan migrate --force`) and caches config/routes on every boot, so the live database schema is always current.
-- Configuration (DB credentials, TLS CA path, `APP_KEY`, allowed CORS origin) is supplied entirely through **environment variables** — no secrets in the repository.
+- Configuration (DB credentials, TLS CA path, `APP_KEY`, allowed CORS origin) is supplied entirely through **environment variables**  no secrets in the repository.
 - Connects to **TiDB Cloud** (MySQL-compatible) over TLS.
 
 ### Front-ends → GitHub Pages
@@ -218,13 +218,12 @@ Each tier deploys to the platform best suited to it:
 
 | Tier            | Technology                                                                 |
 |-----------------|---------------------------------------------------------------------------|
-| **Backend**     | Laravel 11 · PHP 8.2+ · Laravel Sanctum 4 · Eloquent ORM · Pest tests     |
+| **Backend**     | Laravel 11 · PHP 8.2+ · Laravel Sanctum 4 · Eloquent ORM · Swagger UI     |
 | **Database**    | TiDB Cloud (MySQL-compatible) over TLS                                     |
-| **Shell SPA**   | Angular 18 (standalone components) · TypeScript · Reactive Forms · RxJS    |
+| **Frontend SPA**   | Angular 18 (standalone components) · TypeScript · Reactive Forms · RxJS    |
 | **Game SPA**    | Vue 3 · Vuex 4 · Axios · TypeScript                                        |
-| **Styling**     | Shared CSS-variable design system · Playwrite NZ Basic (Google Fonts) · SVG/CSS animation |
-| **Deployment**  | Render (Docker, Apache) · GitHub Pages · environment-driven configuration  |
+| **Deployment**  | Render (Docker, Apache) · GitHub Pages  |
 
 ---
 
-<p align="center"><em>Built with care as comprehensive Web Development coursework — from the database schema all the way to the cloud. 💜</em></p>
+<p align="center"><em>Built with care as comprehensive Web Development coursework  from the database schema all the way to the cloud. 💜</em></p>
