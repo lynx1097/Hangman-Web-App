@@ -34,6 +34,7 @@ COPY . /var/www/html/
 # package discovery happens at runtime into the writable bootstrap/cache.
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
 
+RUN php artisan l5-swagger:generate 
 # Laravel needs these writable at runtime
 RUN chown -R www-data:www-data /var/www/html \
  && chmod -R 775 storage bootstrap/cache
