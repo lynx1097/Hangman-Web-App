@@ -30,23 +30,23 @@ This project was originally built as **coursework for a comprehensive Web Develo
 
 ## 🖼️ Screenshots
 
-### Home (Angular)
+### Home 
 <p align="center"><img src="screenshots/home.jpeg" alt="Home page" width="800"></p>
 
-### Sign Up (Angular)
+### Sign Up 
 <p align="center"><img src="screenshots/signup.jpeg" alt="Sign up page" width="800"></p>
 
-### Login + cold-start loader (Angular)
+### Login + cold-start loader
 <p align="center"><img src="screenshots/login.jpeg" alt="Login page" width="800"></p>
 <p align="center"><img src="screenshots/loading.jpeg" alt="Cold-start entertaining loader" width="800"></p>
 
-### The Game  in progress (Vue)
+### The Game  in progress
 <p align="center"><img src="screenshots/game-playing.jpeg" alt="Game in progress" width="800"></p>
 
-### The Game  win / loss states (Vue)
+### The Game  win / loss states
 <p align="center"><img src="screenshots/game-won.jpeg" alt="Game won" width="800"></p>
 
-### Profile & stats (Angular)
+### Profile & stats 
 <p align="center"><img src="screenshots/profile.jpeg" alt="Profile page" width="800"></p>
 
 ### Mobile / responsive views
@@ -56,47 +56,47 @@ This project was originally built as **coursework for a comprehensive Web Develo
 
 ## 🏗️ Architecture at a glance
 
-```
-                   ┌──────────────────────────────────────────┐
-                   │                The Player                │
-                   └─────────────────────┬────────────────────┘
-                                         │
-            ┌────────────────────────────┴─────────────────────────────┐
-            │                                                          │
-            ▼                                                          ▼
-┌───────────────────────────┐                         ┌───────────────────────────┐
-│   hg-front-game (Angular) │                         │   hangman-game (Vue 3)    │
-│  ─────────────────────────│                         │ ──────────────────────────│
-│  • Home / marketing       │   shared Bearer token   │  • The actual gameplay    │
-│  • Sign up / Login        │  ───────────────────►   │  • Animated SVG hangman   │
-│  • Profile & stats        │   (localStorage +       │  • Keyboard + on-screen   │
-│  • Auth guard/interceptor │    ?token= handoff)     │    keypad input           │
-│  GitHub Pages: /app/      │                         │  GitHub Pages: /game/     │
-└─────────────┬─────────────┘                         └─────────────┬─────────────┘
-              │                                                     │
-              │            REST + Sanctum Bearer tokens             │
-              └────────────────────────┬────────────────────────────┘
-                                       ▼
-                       ┌─────────────────────────────────┐
-                       │      hg-backend (Laravel 11)    │
-                       │  ───────────────────────────────│
-                       │  • REST API (/api/*)            │
-                       │  • Sanctum token auth           │
-                       │  • Game logic (word is secret)  │
-                       │  • Leaderboard & user accounts  │
-                       │  Render (Docker, PHP 8.3+Apache)│
-                       └───────────────┬─────────────────┘
-                                       ▼
-                       ┌────────────────────────────────┐
-                       │     TiDB Cloud (MySQL, TLS)    │
-                       └────────────────────────────────┘
+ ```
+                                       ┌──────────────────────────────────────────┐
+                                       │                The Player                │
+                                       └─────────────────────┬────────────────────┘
+                                                             │
+                                ┌────────────────────────────┴─────────────────────────────┐
+                                │                                                          │
+                                ▼                                                          ▼
+                    ┌───────────────────────────┐                         ┌───────────────────────────┐
+                    │   hg-front-game (Angular) │                         │   hangman-game (Vue 3)    │
+                    │  ─────────────────────────│                         │ ──────────────────────────│
+                    │  • Home / marketing       │   shared Bearer token   │  • The actual gameplay    │
+                    │  • Sign up / Login        │  ───────────────────►   │  • Animated SVG hangman   │
+                    │  • Profile & stats        │   (localStorage +       │  • Keyboard + on-screen   │
+                    │  • Auth guard/interceptor │    ?token= handoff)     │    keypad input           │
+                    │  GitHub Pages: /app/      │                         │  GitHub Pages: /game/     │
+                    └─────────────┬─────────────┘                         └─────────────┬─────────────┘
+                                  │                                                     │
+                                  │            REST + Sanctum Bearer tokens             │
+                                  └────────────────────────┬────────────────────────────┘
+                                                           ▼
+                                           ┌─────────────────────────────────┐
+                                           │      hg-backend (Laravel 11)    │
+                                           │  ───────────────────────────────│
+                                           │  • REST API (/api/*)            │
+                                           │  • Sanctum token auth           │
+                                           │  • Game logic (word is secret)  │
+                                           │  • Leaderboard & user accounts  │
+                                           │  Render (Docker, PHP 8.3+Apache)│
+                                           └───────────────┬─────────────────┘
+                                                           ▼
+                                           ┌────────────────────────────────┐
+                                           │     TiDB Cloud (MySQL, TLS)    │
+                                           └────────────────────────────────┘
 ```
 
 ---
 
-## 🧩 The three applications
+## The three layers
 
-### 1. `hg-backend`  Laravel 11 REST API 
+### 1. `Backend`  Laravel 11 REST API 
 
 The backend owns **all** game state and secrets. The word being guessed **never leaves the server** until the game ends  clients only ever receive the *masked* word, the hint, and the count of remaining attempts. Every guess is validated and scored server-side, which makes the game impossible to cheat from the browser.
 
@@ -111,7 +111,7 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 - **Self-service, self-only account management:** every `/users/{user}` route verifies the authenticated user is acting on their own account (`403` otherwise).
 - **Automated test suite (Pest):** 11 feature tests, 56 assertions, covering authentication gates, masked-word generation, the API/fallback word source, correct/incorrect guess accounting, win/loss transitions, leaderboard updates, duplicate/invalid-letter rejection, and ownership enforcement.
 
-**Core API surface**
+**API Design**
 
 ## <p align="left"> **You can consult and test the API using swagger UI here [<img src="screenshots/swagger_logo.svg" alt="Swagger Logo" width="100">](https://hangman-web-app.onrender.com/)</p>** 
 
@@ -131,9 +131,9 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 | `GET`  | `/api/leaderboard/users/{user}`   | ✅   | A player's personal stats                |
 
 
-### 2. `hg-front-game`  Angular 18 application (the shell)
+### 2. `Frontend`  Angular 18 SPA 
 
-The Angular app is the **front door**: home page,leaderboards , account creation, login, and the player profile. It is a modern **standalone-component** Angular app (no `NgModule`(s)).
+The Angular app is the **front door**: home page , leaderboards, account creation, login, and the player profile. It is a modern **standalone-component** Angular app (no `NgModule`(s)).
 
 **Highlights**
 - **Angular 18** standalone components with **reactive forms** and client-side validation that mirrors the backend rules.
@@ -146,7 +146,7 @@ The Angular app is the **front door**: home page,leaderboards , account creation
 - **Full account self-service:** a dedicated **leaderboard page** (global rankings with medals for the top three), an in-profile **change-password** form (verifies the current password), and a confirm-gated **delete-account** flow  every backend account API is now surfaced in the UI.
 - **Auth-aware navigation:** the home page shows **Login / Sign Up** when signed out and swaps to a **Profile** button once a token is present, so the entry points always match the player's state.
 
-### 3. `hangman-game`  Vue 3 single-page app 
+### 3. `Game Core`  Vue 3 single-page app 
 
 The Vue app is where the game actually happens  a focused, reactive SPA.
 
@@ -160,6 +160,8 @@ The Vue app is where the game actually happens  a focused, reactive SPA.
 - **In-game Home button** that returns the player to the Angular shell's home page.
 - **Its own entertaining loader** for the first backend hit, matching the Angular experience.
 
+> [!NOTE]
+> Both the frontend and the Game Core are built with responsive design , which means you can view and play on any screen size , including mobile browsers !
 ---
 
 ## 🔗 How the three ends are wired
