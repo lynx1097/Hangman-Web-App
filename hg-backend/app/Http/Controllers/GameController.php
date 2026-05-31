@@ -15,6 +15,18 @@ class GameController extends Controller
     private const MAX_WRONG = 6;
 
     /**
+     * @OA\Get(
+     *     path="/api/games",
+     *     summary="List all games for the authenticated user",
+     *     tags={"Games"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Array of game states (word revealed for finished games)",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/GameState"))
+     *     )
+     * )
+     *
      * List the authenticated user's games (most recent first).
      */
     public function index(Request $request)
@@ -28,6 +40,33 @@ class GameController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/games",
+     *     summary="Start a new game",
+     *     tags={"Games"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(property="category", type="string", enum={"animal","country","food","plant","sport"}, example="animal"),
+     *                 @OA\Property(property="minLetters", type="integer", minimum=1, maximum=20, example=4),
+     *                 @OA\Property(property="maxLetters", type="integer", minimum=1, maximum=20, example=8)
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 @OA\Property(property="category", type="string", enum={"animal","country","food","plant","sport"}, example="animal"),
+     *                 @OA\Property(property="minLetters", type="integer", minimum=1, maximum=20, example=4),
+     *                 @OA\Property(property="maxLetters", type="integer", minimum=1, maximum=20, example=8)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="New game created", @OA\JsonContent(ref="#/components/schemas/GameState")),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     *
      * Start a new game for the authenticated user with a random word.
      *
      * Optional difficulty filters (forwarded to the Word Game DB API):
@@ -59,6 +98,17 @@ class GameController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/games/{game}",
+     *     summary="Get a single game",
+     *     tags={"Games"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="game", in="path", required=true, @OA\Schema(type="integer"), example=42),
+     *     @OA\Response(response=200, description="Game state", @OA\JsonContent(ref="#/components/schemas/GameState")),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     *
      * Show a single game belonging to the authenticated user.
      */
     public function show(Request $request, Game $game)
@@ -69,6 +119,17 @@ class GameController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/games/{game}",
+     *     summary="Delete a game",
+     *     tags={"Games"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="game", in="path", required=true, @OA\Schema(type="integer"), example=42),
+     *     @OA\Response(response=204, description="Game deleted"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     *
      * Delete a game belonging to the authenticated user.
      */
     public function destroy(Request $request, Game $game)
@@ -81,6 +142,39 @@ class GameController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/games/{game}/guesses",
+     *     summary="Submit a letter guess",
+     *     tags={"Games"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="game", in="path", required=true, @OA\Schema(type="integer"), example=42),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"letter"},
+     *                 @OA\Property(property="letter", type="string", minLength=1, maxLength=1, example="A"),
+     *                 @OA\Property(property="elapsed_seconds", type="integer", minimum=0, nullable=true, example=30,
+     *                     description="Front-end clock reading used for speed-bonus scoring")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 required={"letter"},
+     *                 @OA\Property(property="letter", type="string", minLength=1, maxLength=1, example="A"),
+     *                 @OA\Property(property="elapsed_seconds", type="integer", minimum=0, nullable=true, example=30,
+     *                     description="Front-end clock reading used for speed-bonus scoring")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Updated game state", @OA\JsonContent(ref="#/components/schemas/GameState")),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=422, description="Game already finished or letter already guessed")
+     * )
+     *
      * Submit a single-letter guess for an in-progress game.
      */
     public function makeGuess(Request $request, Game $game)

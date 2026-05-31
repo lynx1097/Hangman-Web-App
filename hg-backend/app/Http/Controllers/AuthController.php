@@ -11,6 +11,38 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/api/auth/register",
+     *     summary="Register a new user",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"name","email","password","password_confirmation"},
+     *                 @OA\Property(property="name", type="string", example="Jane Doe"),
+     *                 @OA\Property(property="email", type="string", format="email", example="jane@example.com"),
+     *                 @OA\Property(property="password", type="string", minLength=6, example="secret123"),
+     *                 @OA\Property(property="password_confirmation", type="string", example="secret123")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 required={"name","email","password","password_confirmation"},
+     *                 @OA\Property(property="name", type="string", example="Jane Doe"),
+     *                 @OA\Property(property="email", type="string", format="email", example="jane@example.com"),
+     *                 @OA\Property(property="password", type="string", minLength=6, example="secret123"),
+     *                 @OA\Property(property="password_confirmation", type="string", example="secret123")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="User registered", @OA\JsonContent(ref="#/components/schemas/AuthResponse")),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function register(Request $request)
     {
         // Enhanced validation rules including password strength requirements
@@ -50,6 +82,34 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/login",
+     *     summary="Login and get a Bearer token",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"email","password"},
+     *                 @OA\Property(property="email", type="string", format="email", example="jane@example.com"),
+     *                 @OA\Property(property="password", type="string", example="secret123")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 required={"email","password"},
+     *                 @OA\Property(property="email", type="string", format="email", example="jane@example.com"),
+     *                 @OA\Property(property="password", type="string", example="secret123")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Login successful", @OA\JsonContent(ref="#/components/schemas/AuthResponse")),
+     *     @OA\Response(response=401, description="Invalid credentials")
+     * )
+     */
     public function login(Request $request)
     {
         // Validate login request
@@ -86,6 +146,16 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/logout",
+     *     summary="Revoke the current Bearer token",
+     *     tags={"Auth"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Logged out", @OA\JsonContent(@OA\Property(property="message", type="string", example="Successfully logged out"))),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function logout(Request $request)
     {
         // Revoke the token that was used to authenticate the current request
@@ -95,6 +165,38 @@ class AuthController extends Controller
             'message' => 'Successfully logged out'
         ]);
     }
+    /**
+     * @OA\Put(
+     *     path="/api/auth/password",
+     *     summary="Change the authenticated user's password",
+     *     tags={"Auth"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"current_password","password","password_confirmation"},
+     *                 @OA\Property(property="current_password", type="string", example="oldPass1"),
+     *                 @OA\Property(property="password", type="string", minLength=6, example="newPass1"),
+     *                 @OA\Property(property="password_confirmation", type="string", example="newPass1")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 required={"current_password","password","password_confirmation"},
+     *                 @OA\Property(property="current_password", type="string", example="oldPass1"),
+     *                 @OA\Property(property="password", type="string", minLength=6, example="newPass1"),
+     *                 @OA\Property(property="password_confirmation", type="string", example="newPass1")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Password updated", @OA\JsonContent(@OA\Property(property="message", type="string", example="Password successfully updated"))),
+     *     @OA\Response(response=401, description="Current password incorrect"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function changePassword(Request $request)
     {
         $validated = $request->validate([
