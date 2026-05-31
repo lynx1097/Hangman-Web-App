@@ -21,9 +21,10 @@
 
 ## 📖 About this project
 
-This project was originally built as **coursework for a comprehensive Web Development course** in December 2024 . and It's revival now for repolishing and adding to portfolio .
+This project was originally built as **coursework for a comprehensive Web Development course** in December 2024 . and It's revived now and repolished to be added to the portfolio .
 
-> 💡 **A note on the stack:** the architecture is intentionally comprehensive because the course required demonstrating a wide range of technologies. The pay-off is a genuinely decoupled, scalable design where each tier can evolve, scale, and deploy on its own.
+> [!NOTE]
+>  the architecture is intentionally comprehensive because the course required demonstrating a wide range of technologies. The pay-off is a genuinely decoupled, scalable design where each tier can evolve, scale, and deploy on its own.
 
 ---
 
@@ -56,9 +57,9 @@ This project was originally built as **coursework for a comprehensive Web Develo
 ## 🏗️ Architecture at a glance
 
 ```
-                         ┌──────────────────────────────────────────┐
-                         │              The Player                  │
-                         └───────────────┬──────────────────────────┘
+                   ┌──────────────────────────────────────────┐
+                   │                The Player                │
+                   └─────────────────────┬────────────────────┘
                                          │
             ┌────────────────────────────┴─────────────────────────────┐
             │                                                          │
@@ -95,7 +96,7 @@ This project was originally built as **coursework for a comprehensive Web Develo
 
 ## 🧩 The three applications
 
-### 1. `hg-backend`  Laravel 11 REST API (the source of truth)
+### 1. `hg-backend`  Laravel 11 REST API 
 
 The backend owns **all** game state and secrets. The word being guessed **never leaves the server** until the game ends  clients only ever receive the *masked* word, the hint, and the count of remaining attempts. Every guess is validated and scored server-side, which makes the game impossible to cheat from the browser.
 
@@ -112,6 +113,8 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 
 **Core API surface**
 
+## <p align="left"> **You can consult and test the API using swagger UI here [<img src="screenshots/swagger_logo.svg" alt="Swagger Logo" width="100">](https://hangman-web-app.onrender.com/)</p>** 
+
 | Method | Endpoint                          | Auth | Purpose                                  |
 |--------|-----------------------------------|------|------------------------------------------|
 | `POST` | `/api/auth/register`              |     | Create account, returns Bearer token     |
@@ -127,11 +130,10 @@ The backend owns **all** game state and secrets. The word being guessed **never 
 | `GET`  | `/api/leaderboard`                |     | Global leaderboard                       |
 | `GET`  | `/api/leaderboard/users/{user}`   | ✅   | A player's personal stats                |
 
-# ✅ **You can consult and test the API using swagger UI [here](https://hangman-web-app.onrender.com/)**
 
 ### 2. `hg-front-game`  Angular 18 application (the shell)
 
-The Angular app is the **front door**: marketing home page, account creation, login, and the player profile. It is a modern **standalone-component** Angular app (no `NgModule` boilerplate).
+The Angular app is the **front door**: home page,leaderboards , account creation, login, and the player profile. It is a modern **standalone-component** Angular app (no `NgModule`(s)).
 
 **Highlights**
 - **Angular 18** standalone components with **reactive forms** and client-side validation that mirrors the backend rules.
@@ -144,13 +146,13 @@ The Angular app is the **front door**: marketing home page, account creation, lo
 - **Full account self-service:** a dedicated **leaderboard page** (global rankings with medals for the top three), an in-profile **change-password** form (verifies the current password), and a confirm-gated **delete-account** flow  every backend account API is now surfaced in the UI.
 - **Auth-aware navigation:** the home page shows **Login / Sign Up** when signed out and swaps to a **Profile** button once a token is present, so the entry points always match the player's state.
 
-### 3. `hangman-game`  Vue 3 single-page game (the playground)
+### 3. `hangman-game`  Vue 3 single-page app 
 
 The Vue app is where the game actually happens  a focused, reactive SPA.
 
 **Highlights**
 - **Vue 3** with **Vuex 4** for centralized game state and **Axios** for API calls.
-- **Fully animated SVG hangman:** the six body parts fade and scale into place as wrong guesses accumulate (and turn red on a loss)  replacing the old static image sequence entirely.
+- **Fully animated SVG hangman:** the six body parts fade and scale into place as wrong guesses accumulate .
 - **Dual input  keyboard *and* touch:** players can **type a letter** or tap the on-screen keypad. Keyboard input is rate-limited to **one letter at a time with a deliberate cooldown**, giving the backend room to validate and respond before the next guess is accepted  smooth on fast typing, friendly to the network round-trip.
 - **Auto-start:** an authenticated player who lands on the game immediately gets a fresh word.
 - **Live game timer:** the game runs its own clock (the backend keeps no timer) and reports the elapsed seconds with each guess, so a faster win earns a bigger score; the final time is shown on the result card.
@@ -160,15 +162,13 @@ The Vue app is where the game actually happens  a focused, reactive SPA.
 
 ---
 
-## 🔗 How the three apps are coupled
-
-The apps are **independently built and deployed**, yet they behave as one product through three deliberate coupling points:
+## 🔗 How the three ends are wired
 
 1. **A single shared backend & token.** Both front-ends speak to the same Laravel REST API. On successful login, the Angular app stores the Sanctum **Bearer token** in `localStorage` under a shared key (`auth_token`). The Vue game reads that same key.
 
-2. **A cross-origin token handoff.** In production both front-ends live on the same GitHub Pages origin, so `localStorage` is shared directly. To also work in local development (Angular on `:4200`, Vue on `:8080`, different origins), the Angular login **appends the token to the redirect URL** (`?token=…`); the Vue game reads it from the query string on load, persists it, and **cleans the URL**  so the handoff is seamless in both environments.
+2. **A cross-origin token handoff.** In production both front-ends live on the same GitHub Pages origin, so `localStorage` is shared directly. To also work in local development , the Angular login **appends the token to the redirect URL** (`?token=…`); the Vue game reads it from the query string on load, persists it, and **cleans the URL**  so the handoff is seamless in both environments.
 
-3. **A shared visual identity.** Both front-ends use the **same design tokens**  colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font  defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app. Both apps also share an **animated ambient background** (a slowly drifting glow plus a faint moving dot texture, with `prefers-reduced-motion` respected) and a lightened, higher-contrast text palette for comfortable reading.
+3. **A shared visual identity.** Both front-ends use the **same design tokens**  colours, gradients, surfaces, radii, shadows, and the **Playwrite NZ Basic** Google Font  defined as CSS variables. The animated SVG hangman, the glassmorphism cards, and the buttons look identical across the Angular shell and the Vue game, so moving between them feels like one app. 
 
 ---
 
@@ -194,6 +194,18 @@ The apps are **independently built and deployed**, yet they behave as one produc
 
 ---
 
+## 🧰 Tech stack summary
+
+| Tier            | Technology                                                                 |
+|-----------------|---------------------------------------------------------------------------|
+| **Backend**     | Laravel 11 · PHP 8.2+ · Laravel Sanctum 4 · Eloquent ORM · Swagger UI     |
+| **Database**    | TiDB Cloud (MySQL-compatible) over TLS                                     |
+| **Frontend SPA**   | Angular 18 (standalone components) · Reactive Forms · RxJS    |
+| **Game SPA**    | Vue 3 · Vuex 4   |
+| **Deployment**  | Render (Docker, Apache) · GitHub Pages  |
+
+---
+
 ## ☁️ Deployment
 
 Each tier deploys to the platform best suited to it:
@@ -205,7 +217,7 @@ Each tier deploys to the platform best suited to it:
 - Connects to **TiDB Cloud** (MySQL-compatible) over TLS.
 
 ### Front-ends → GitHub Pages
-- Both the Angular **shell** and the Vue **game** are static builds published to GitHub Pages under distinct sub-paths:
+- Both the Angular **front** and the Vue **game** are static builds published to GitHub Pages under distinct sub-paths:
   - Angular shell → `…/Hangman-Web-App/app/`
   - Vue game → `…/Hangman-Web-App/game/`
 - A **GitHub Actions workflow** (`.github/workflows/deploy-pages.yml`) builds both front-ends and publishes them to Pages on every push.
@@ -213,17 +225,3 @@ Each tier deploys to the platform best suited to it:
 - Angular uses **hash routing** and Vue uses a configurable **public path**, so both work correctly under a sub-path with no server rewrites.
 
 ---
-
-## 🧰 Tech stack summary
-
-| Tier            | Technology                                                                 |
-|-----------------|---------------------------------------------------------------------------|
-| **Backend**     | Laravel 11 · PHP 8.2+ · Laravel Sanctum 4 · Eloquent ORM · Swagger UI     |
-| **Database**    | TiDB Cloud (MySQL-compatible) over TLS                                     |
-| **Frontend SPA**   | Angular 18 (standalone components) · TypeScript · Reactive Forms · RxJS    |
-| **Game SPA**    | Vue 3 · Vuex 4 · Axios · TypeScript                                        |
-| **Deployment**  | Render (Docker, Apache) · GitHub Pages  |
-
----
-
-<p align="center"><em>Built with care as comprehensive Web Development coursework  from the database schema all the way to the cloud. 💜</em></p>
